@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraExam - Active Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/src/utils/security.js"></script>
+    <script src="/src/services/exam.service.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webgazer@3.3.0/dist/webgazer.min.js"></script>
+    <script>
+        if (typeof SecurityGuard !== 'undefined') {
+            SecurityGuard.protectPage('student');
+            SecurityGuard.initProctoring();
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap');
+        * { font-family: 'DM Sans', sans-serif; }
+        .font-mono { font-family: 'DM Mono', monospace !important; }
+
+        /* ── WebGazer mini feed ── */
+        #webgazerVideoFeed {
+            position: fixed !important;
+            bottom: 20px !important; left: 20px !important;
+            top: auto !important; right: auto !important;
+            border-radius: 12px; z-index: 60 !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 2px solid #3b82f6;
+            transform: scaleX(-1) !important;
+            width: 140px !important; height: 105px !important;
+            object-fit: cover;
+        }
+        #webgazerVideoCanvas, #webgazerFaceOverlay, #webgazerFaceFeedbackBox { display: none !important; }
+
+        /* ── Calibration dots ── */
+        .calib-dot {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: #1e40af;
+            border: 3px solid #60a5fa;
+            cursor: pointer;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .calib-dot:hover:not(.done) { transform: translate(-50%,-50%) scale(1.3); box-shadow: 0 0 0 8px rgba(96,165,250,0.3); }
+        .calib-dot.clicked { animation: dotPulse 0.3s ease-out; }
+        .calib-dot.done { background: #16a34a; border-color: #4ade80; cursor: default; box-shadow: 0 0 0 6px rgba(22,163,74,0.25); }
+        
+        @keyframes dotPulse {
+            0%   { transform: translate(-50%,-50%) scale(1); }
+            50%  { transform: translate(-50%,-50%) scale(1.5); }
+            100% { transform: translate(-50%,-50%) scale(1); }
+        }
+
+        /* ── Step indicator lines ── */
+        .step-line { flex: 1; height: 2px; background: rgba(255,255,255,0.2); transition: background 0.4s; }
+        .step-line.done { background: rgba(255,255,255,0.8); }
+
+        /* ── Warning banner ── */
+        #proctor-warning { transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+
+        /* ── Panel slide-in ── */
+        .panel-enter { animation: panelIn 0.3s ease-out forwards; }
+        @keyframes panelIn {
+            from { opacity:0; transform: translateY(10px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+
+        /* ── Green glow on ready button ── */
+        @keyframes glowPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(22,163,74,0.5); }
+            50%      { box-shadow: 0 0 0 14px rgba(22,163,74,0); }
+        }
+        .glow-ready { animation: glowPulse 1.8s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-slate-100 flex flex-col h-screen text-slate-800 selection:bg-blue-200 relative overflow-hidden">
+
+    <!-- ══════════════════════════════════════════
+         PROCTORING WARNING BANNER
+    ══════════════════════════════════════════ -->
+    <div id="proctor-warning"
+         class="fixed top-5 left-1/2 -translate-x-1/2 -translate-y-[200%] bg-red-600 text-white px-6 py-3.5 rounded-2xl shadow-2xl font-bold z-[300] flex items-center gap-3 whitespace-nowrap">
+        <svg class="w-5 h-5 animate-pulse flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <span id="proctor-warning-text">Keep your face visible and eyes on screen!</span>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PRE-EXAM OVERLAY (3 Steps: Instructions -> Face -> Calibrate)
+    ══════════════════════════════════════════ -->
+    <div id="pre-exam-overlay" class="fixed inset-0 z-[200] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden">
+
+            <!-- Gradient Header -->
+            <div class="bg-gradient-to-br from-blue-700 via-blue-700 to-indigo-800 px-8 pt-7 pb-6 text-white">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 bg-white/15 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-200">Proctored Exam</span>
+                </div>
+                <h2 id="pre-exam-title" class="text-xl font-black leading-snug mb-0.5">Loading...</h2>
+                <p id="pre-exam-course" class="text-blue-200 text-sm">Please wait</p>
+
+                <!-- Step Progress -->
+                <div class="flex items-center gap-2 mt-5">
+                    <div id="si-1" class="w-7 h-7 rounded-full bg-white text-blue-700 text-xs font-black flex items-center justify-center flex-shrink-0 transition-all">1</div>
+                    <div id="sl-1" class="step-line"></div>
+                    <div id="si-2" class="w-7 h-7 rounded-full bg-white/20 text-white/50 text-xs font-black flex items-center justify-center flex-shrink-0 transition-all">2</div>
+                    <div id="sl-2" class="step-line"></div>
+                    <div id="si-3" class="w-7 h-7 rounded-full bg-white/20 text-white/50 text-xs font-black flex items-center justify-center flex-shrink-0 transition-all">3</div>
+                </div>
+                <div class="flex text-[10px] font-bold text-blue-200/70 uppercase tracking-wider mt-1.5" style="justify-content:space-between;padding:0 0 0 4px;">
+                    <span>Instructions</span><span>Face Check</span><span>Calibrate</span>
+                </div>
+            </div>
+
+            <!-- ─── STEP 1: Instructions ─── -->
+            <div id="step-instructions" class="px-8 py-6 space-y-5 panel-enter">
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+                    <p class="text-xs font-black text-amber-700 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Before You Begin
+                    </p>
+                    <ul class="space-y-2.5 text-sm text-amber-800">
+                        <li class="flex gap-2.5"><span class="font-black text-amber-500 flex-shrink-0 text-xs mt-0.5">01</span>You have <strong id="pre-exam-duration">--</strong> minutes. Timer starts after calibration.</li>
+                        <li class="flex gap-2.5"><span class="font-black text-amber-500 flex-shrink-0 text-xs mt-0.5">02</span><strong>Camera is required.</strong> Your gaze is monitored the entire session.</li>
+                        <li class="flex gap-2.5"><span class="font-black text-amber-500 flex-shrink-0 text-xs mt-0.5">03</span>Refreshing mid-exam requires re-verification before you can continue.</li>
+                        <li class="flex gap-2.5"><span class="font-black text-amber-500 flex-shrink-0 text-xs mt-0.5">04</span>You have <strong>one attempt only.</strong> Ensure a stable internet connection.</li>
+                    </ul>
+                </div>
+                <div class="flex gap-3">
+                    <a href="/student-exams.html" class="flex-1 py-3 text-center border-2 border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-colors text-sm">Cancel</a>
+                    <button id="btn-to-face-check" class="flex-1 py-3 bg-blue-700 text-white font-bold rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-200 text-sm flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        Enable Camera →
+                    </button>
+                </div>
+            </div>
+
+            <!-- ─── STEP 2: Face Detection ─── -->
+            <div id="step-face" class="px-8 py-6 space-y-4 hidden">
+                <div class="text-center">
+                    <h3 class="font-black text-slate-900 text-lg mb-1">Face Verification</h3>
+                    <p class="text-slate-500 text-sm">Position your face in the frame and hold still until the bar fills.</p>
+                </div>
+
+                <!-- Camera preview -->
+                <div class="relative mx-auto rounded-2xl overflow-hidden bg-black border border-slate-200" style="width:270px;height:200px;">
+                    <video id="face-preview" autoplay muted playsinline class="w-full h-full object-cover" style="transform:scaleX(-1)"></video>
+
+                    <!-- Face bounding box -->
+                    <div id="face-box" class="absolute pointer-events-none rounded-lg transition-all duration-150"
+                         style="border:2px solid #22c55e;box-shadow:0 0 12px rgba(34,197,94,0.35);opacity:0;top:15%;left:15%;width:70%;height:75%;"></div>
+
+                    <!-- Corner guides -->
+                    <div class="absolute top-2 left-2 w-5 h-5 border-t-2 border-l-2 border-blue-400 rounded-tl pointer-events-none"></div>
+                    <div class="absolute top-2 right-2 w-5 h-5 border-t-2 border-r-2 border-blue-400 rounded-tr pointer-events-none"></div>
+                    <div class="absolute bottom-2 left-2 w-5 h-5 border-b-2 border-l-2 border-blue-400 rounded-bl pointer-events-none"></div>
+                    <div class="absolute bottom-2 right-2 w-5 h-5 border-b-2 border-r-2 border-blue-400 rounded-br pointer-events-none"></div>
+
+                    <!-- No face overlay -->
+                    <div id="no-face-overlay" class="absolute inset-0 flex items-center justify-center bg-black/40 hidden">
+                        <p class="text-white text-xs font-bold text-center px-4">No face detected<br/>Adjust your position</p>
+                    </div>
+                </div>
+
+                <!-- Status row -->
+                <div class="flex items-center justify-center gap-2">
+                    <div id="face-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></div>
+                    <p id="face-status" class="text-sm font-bold text-amber-600">Initializing camera...</p>
+                </div>
+
+                <!-- Detection progress bar -->
+                <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-slate-200">
+                    <div id="face-progress" class="h-full bg-blue-600 rounded-full transition-all duration-100" style="width:0%"></div>
+                </div>
+                <p class="text-center text-xs text-slate-400">Keep your face visible until the bar is full</p>
+
+                <button id="btn-to-calibration" disabled
+                        class="w-full py-3 bg-blue-700 text-white font-bold rounded-2xl disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all shadow-md text-sm">
+                    Continue to Calibration →
+                </button>
+            </div>
+
+            <!-- ─── STEP 3: Gaze Calibration ─── -->
+            <div id="step-calibration" class="px-8 py-6 space-y-4 hidden">
+                <div class="text-center">
+                    <h3 class="font-black text-slate-900 text-lg mb-1">Gaze Calibration</h3>
+                    <p class="text-slate-500 text-sm">Click each dot <strong class="text-slate-700">5 times</strong> while looking directly at it.</p>
+                </div>
+
+                <!-- Calibration arena -->
+                <div id="calib-arena" class="relative bg-slate-950 rounded-2xl overflow-hidden border border-slate-800" style="height:200px;width:100%;">
+                    <p id="calib-hint" class="absolute inset-0 flex items-center justify-center text-slate-500 text-xs font-medium pointer-events-none">
+                        Nine dots will appear — click each one 5 times
+                    </p>
+                </div>
+
+                <!-- Progress -->
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500">Progress</span>
+                    <span id="calib-count" class="text-xs font-bold text-slate-700">0 / 9 dots</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div id="calib-bar" class="h-full bg-indigo-600 rounded-full transition-all duration-300" style="width:0%"></div>
+                </div>
+
+                <button id="btn-start-exam" disabled
+                        class="w-full py-3.5 bg-green-600 text-white font-black rounded-2xl disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all text-sm">
+                    ✓ Calibration Complete — Start Assessment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         EXAM HEADER
+    ══════════════════════════════════════════ -->
+    <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-50 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+            </div>
+            <div>
+                <h1 id="exam-title" class="font-bold text-slate-800 text-sm leading-tight">Exam</h1>
+                <p id="exam-course" class="text-xs text-slate-500">Course</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div id="proctoring-badge" class="hidden items-center gap-2 bg-red-50 px-3 py-1.5 rounded-full border border-red-100">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                <span class="text-xs font-bold text-red-700 uppercase tracking-widest">Eye-Tracking Active</span>
+            </div>
+            <div id="review-badge" class="hidden items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100">
+                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <span class="text-xs font-bold text-indigo-700 uppercase tracking-widest">Review Mode</span>
+            </div>
+            <div id="timer-wrapper" class="text-right">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Time Remaining</p>
+                <p id="exam-timer" class="font-mono font-bold text-xl text-slate-800 leading-tight tracking-wider">--:--</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- ══════════════════════════════════════════
+         MAIN EXAM BODY
+    ══════════════════════════════════════════ -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-8">
+        <div class="max-w-3xl mx-auto">
+
+            <!-- Missed Exam Container -->
+            <div id="missed-container" class="hidden">
+                <div class="bg-white border-2 border-red-100 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="bg-red-50 px-8 py-10 text-center border-b border-red-100">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-red-800 mb-2">Exam Not Attempted</h2>
+                        <p class="text-red-600 text-sm max-w-sm mx-auto">This exam has already closed. You did not submit before the deadline.</p>
+                    </div>
+                    <div class="px-8 py-6 space-y-4">
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Exam</p>
+                                <p id="missed-exam-title" class="font-bold text-slate-800">—</p>
+                            </div>
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Course</p>
+                                <p id="missed-exam-course" class="font-bold text-slate-800">—</p>
+                            </div>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
+                            <strong>Note:</strong> Questions are unavailable for closed exams. Contact your lecturer with concerns.
+                        </div>
+                        <a href="/student-exams.html" class="flex items-center justify-center gap-2 w-full py-3.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-all">← Back to My Exams</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Container -->
+            <div id="error-container" class="hidden bg-red-50 border-2 border-red-200 text-red-700 p-6 rounded-xl text-center shadow-sm">
+                <svg class="w-12 h-12 mx-auto mb-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <h2 class="text-xl font-bold mb-2">Access Denied</h2>
+                <p id="error-message" class="text-slate-600 mb-6">You cannot take this exam.</p>
+                <a href="/student-dashboard.html" class="inline-block px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Return to Dashboard</a>
+            </div>
+
+            <!-- Active / Review form -->
+            <form id="exam-form" class="space-y-8 hidden">
+                <!-- Review score banner -->
+                <div id="review-score-banner" class="hidden bg-white border border-indigo-100 rounded-xl p-5 shadow-sm flex flex-col sm:flex-row items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div class="text-center sm:text-left flex-1">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Your Result</p>
+                        <p id="review-score-text" class="text-2xl font-black text-slate-900">— / —</p>
+                        <p id="review-percentage-text" class="text-sm font-bold">—%</p>
+                    </div>
+                    <div class="text-center sm:text-right">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Submitted</p>
+                        <p id="review-submitted-at" class="text-sm font-bold text-slate-700">—</p>
+                    </div>
+                </div>
+
+                <!-- Questions Container -->
+                <div id="questions-wrapper" class="space-y-6"></div>
+
+                <!-- Submit Bar -->
+                <div id="submit-bar" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <p class="text-sm text-slate-500">Ensure all questions are answered before submitting.</p>
+                    <button type="button" id="btn-submit" class="w-full sm:w-auto px-8 py-3.5 bg-blue-700 text-white font-bold rounded-xl hover:bg-blue-800 transition-all shadow-md active:scale-95 whitespace-nowrap">
+                        Submit Assessment
+                    </button>
+                </div>
+
+                <!-- Review Back Bar -->
+                <div id="review-back-bar" class="hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex justify-center">
+                    <a href="/student-exams.html" class="px-8 py-3.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-all shadow-md">← Back to My Exams</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+<script>
+// ═══════════════════════════════════════════
+//  UTILS & GLOBALS (Must be at the top)
+// ═══════════════════════════════════════════
+function el(id) { return document.getElementById(id); }
+function hide(id) { if(el(id)) el(id).classList.add('hidden'); }
+function show(id) { if(el(id)) el(id).classList.remove('hidden'); }
+function setText(id, v) { if(el(id)) el(id).innerText = v; }
+
+// Exam data
+let currentExamId = null, userEmail = null, timerInterval = null, examDataObj = null;
+
+// Proctoring state tracking
+let isProctoringActive = false;
+let warningCount = 0;
+let suspiciousFrames = 0; // Tracks if face is completely missing
+let wanderingFrames = 0;  // Tracks if face is present, but eyes are looking off-screen
+
+// Face detection
+const FACE_FRAMES_NEEDED = 55;
+let faceFrameCount = 0, faceStream = null, isFaceVerified = false;
+
+// Calibration
+const CALIB_CLICKS  = 5;
+const CALIB_POS = [
+    [15,15],[50,15],[85,15],
+    [15,50],[50,50],[85,50],
+    [15,85],[50,85],[85,85]
+];
+let calibDone = 0;
+
+// ═══════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+    const p = new URLSearchParams(window.location.search);
+    currentExamId = p.get('id');
+    const s = typeof SecurityGuard !== 'undefined' ? SecurityGuard.getSession() : null;
+    if (s) userEmail = s.email;
+
+    if (!currentExamId || !userEmail) {
+        showError("Invalid access parameters.");
+        hide('pre-exam-overlay');
+        return;
+    }
+    
+    // Bind manual submit button
+    const btnSubmit = el('btn-submit');
+    if (btnSubmit) {
+        btnSubmit.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (!confirm("Submit now? You only have one attempt.")) return;
+            await processSubmission(false);
+        });
+    }
+
+    // Intercept window blurs (tab switching / app switching) for strict proctoring
+    window.addEventListener("blur", () => {
+        if (isProctoringActive) {
+            triggerWarning("Window lost focus! Do not open other applications.");
+        }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden && isProctoringActive) {
+            triggerWarning("Tab switch detected! You must stay on the exam page.");
+        }
+    });
+
+    await loadExamDetails();
+});
+
+// ═══════════════════════════════════════════
+//  LOAD EXAM
+// ═══════════════════════════════════════════
+async function loadExamDetails() {
+    const res = await ExamService.getExamToTake(currentExamId);
+    if (!res.success) { showError(res.message); hide('pre-exam-overlay'); return; }
+
+    const { exam, questions, submission, isReadonly, isMissed } = res.data;
+    examDataObj = exam;
+
+    if (isMissed) { hide('pre-exam-overlay'); showMissed(exam); return; }
+    if (isReadonly && submission) { hide('pre-exam-overlay'); showReview(exam, questions, submission); return; }
+
+    // Active exam logic
+    setText('pre-exam-title',    exam.title);
+    setText('pre-exam-course',   exam.courseName);
+    setText('pre-exam-duration', exam.durationMinutes);
+    setText('exam-title',        exam.title);
+    setText('exam-course',       exam.courseName);
+    renderQuestions(questions, null);
+
+    // Check mid-exam refresh
+    const key = `aura_exam_start_${currentExamId}_${userEmail}`;
+    if (localStorage.getItem(key)) {
+        goToStep('face');
+        hide('btn-to-calibration'); // Hide calibration button since we will auto-resume the exam
+        startFaceDetection();
+    } else {
+        goToStep('instructions');
+    }
+
+    el('btn-to-face-check').addEventListener('click', async () => { goToStep('face'); await startFaceDetection(); });
+    el('btn-to-calibration').addEventListener('click', () => { stopFaceStream(); goToStep('calibration'); buildDots(); });
+    el('btn-start-exam').addEventListener('click', beginExam);
+}
+
+// ═══════════════════════════════════════════
+//  STEP NAVIGATION
+// ═══════════════════════════════════════════
+function goToStep(step) {
+    ['instructions','face','calibration'].forEach(s => {
+        el(`step-${s}`).classList.add('hidden');
+        el(`step-${s}`).classList.remove('panel-enter');
+    });
+    const target = el(`step-${step}`);
+    target.classList.remove('hidden');
+    void target.offsetWidth; // force reflow
+    target.classList.add('panel-enter');
+
+    const num = { instructions:1, face:2, calibration:3 }[step];
+    for (let i = 1; i <= 3; i++) {
+        const si = el(`si-${i}`), sl = el(`sl-${i}`);
+        if (i < num) {
+            si.className = 'w-7 h-7 rounded-full bg-white text-blue-700 text-xs font-black flex items-center justify-center flex-shrink-0';
+            si.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
+        } else if (i === num) {
+            si.className = 'w-7 h-7 rounded-full bg-white text-blue-700 text-xs font-black flex items-center justify-center flex-shrink-0';
+            si.innerHTML = `${i}`;
+        } else {
+            si.className = 'w-7 h-7 rounded-full bg-white/20 text-white/50 text-xs font-black flex items-center justify-center flex-shrink-0';
+            si.innerHTML = `${i}`;
+        }
+        if (sl) sl.className = `step-line${i < num ? ' done' : ''}`;
+    }
+}
+
+// ═══════════════════════════════════════════
+//  STEP 2 & EXAM — UNIFIED FACE/GAZE DETECTION
+// ═══════════════════════════════════════════
+async function startFaceDetection() {
+    faceFrameCount = 0;
+    isFaceVerified = false;
+    el('face-progress').style.width = '0%';
+    setFaceStatus('Requesting camera access...', 'pending');
+
+    try {
+        faceStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:'user', width:640, height:480 } });
+        el('face-preview').srcObject = faceStream;
+        setFaceStatus('Look directly at the camera...', 'pending');
+
+        if (typeof webgazer !== 'undefined') {
+            await webgazer.setGazeListener((data) => {
+                
+                // --- PHASE 1: PRE-EXAM FACE VERIFICATION ---
+                if (!isFaceVerified) {
+                    if (data !== null) {
+                        faceFrameCount = Math.min(faceFrameCount + 1, FACE_FRAMES_NEEDED);
+                        el('face-box').style.opacity  = '1';
+                        el('no-face-overlay').classList.add('hidden');
+                        const pct = Math.round((faceFrameCount / FACE_FRAMES_NEEDED) * 100);
+                        setFaceStatus(`Face detected — hold still... (${pct}%)`, 'detecting');
+                    } else {
+                        faceFrameCount = Math.max(faceFrameCount - 0.5, 0);
+                        el('face-box').style.opacity  = '0';
+                        el('no-face-overlay').classList.remove('hidden');
+                        setFaceStatus('No face detected. Move closer or adjust lighting.', 'error');
+                    }
+
+                    el('face-progress').style.width = `${(faceFrameCount / FACE_FRAMES_NEEDED) * 100}%`;
+
+                    // Verification Complete!
+                    if (faceFrameCount >= FACE_FRAMES_NEEDED) {
+                        isFaceVerified = true; 
+                        el('face-progress').classList.add('bg-green-500');
+                        el('face-progress').classList.remove('bg-blue-600');
+                        el('face-box').style.borderColor = '#22c55e';
+                        setFaceStatus('✓ Face verified successfully!', 'success');
+                        
+                        // If they are resuming a mid-exam refresh, jump straight into the exam
+                        if (localStorage.getItem(`aura_exam_start_${currentExamId}_${userEmail}`)) {
+                            webgazer.showVideoPreview(true); // Re-enable mini feed
+                            setTimeout(() => { beginExam(); }, 1500);
+                        } else {
+                            // Normal flow: Unlock calibration button
+                            const btn = el('btn-to-calibration');
+                            btn.disabled = false;
+                            btn.classList.add('shadow-blue-200');
+                        }
+                    }
+                    return; // End of listener for Phase 1
+                }
+
+                // --- PHASE 2: ACTIVE PROCTORING (During Exam) ---
+                if (!isProctoringActive) return;
+
+                if (data == null) {
+                    // Face is completely missing from the camera frame
+                    suspiciousFrames++;
+                    wanderingFrames = Math.max(wanderingFrames - 1, 0); // Decay gaze warning
+                } else {
+                    suspiciousFrames = Math.max(suspiciousFrames - 2, 0);
+
+                    // User is present, check their Gaze (X, Y predictions)
+                    // If they look far off the screen boundaries, increment wandering frames
+                    const oob = data.x < -30 || data.y < -30 || data.x > window.innerWidth + 30 || data.y > window.innerHeight + 30;
+                    
+                    if (oob) {
+                        wanderingFrames++;
+                    } else {
+                        wanderingFrames = Math.max(wanderingFrames - 2, 0);
+                    }
+                }
+
+                // Fire distinct warnings based on behavior (approx 45 frames ~ 1.5 seconds)
+                if (suspiciousFrames > 45) { 
+                    triggerWarning("Face not visible! Please ensure you face the camera."); 
+                    suspiciousFrames = 0; 
+                } else if (wanderingFrames > 45) {
+                    triggerWarning("Eyes wandering off-screen! Please focus on the exam."); 
+                    wanderingFrames = 0; 
+                }
+
+            }).begin();
+
+            webgazer.showPredictionPoints(false); // Hide the distracting red tracking dot
+            webgazer.showVideoPreview(false); // Hidden during verification, shown later during exam
+        } else {
+            // Fallback if webgazer fails to load
+            setTimeout(() => {
+                el('face-progress').style.width = '100%';
+                setFaceStatus('Camera ready.', 'success');
+                el('btn-to-calibration').disabled = false;
+            }, 1800);
+        }
+    } catch (err) {
+        setFaceStatus('Camera access denied. Please allow permissions and reload.', 'error');
+    }
+}
+
+function setFaceStatus(text, state) {
+    const colors = {
+        pending:   ['bg-amber-400 animate-pulse', 'text-amber-600'],
+        detecting: ['bg-blue-500 animate-pulse',  'text-blue-600'],
+        success:   ['bg-green-500',               'text-green-600'],
+        error:     ['bg-red-500',                 'text-red-600'],
+    };
+    el('face-dot').className    = `w-2.5 h-2.5 rounded-full flex-shrink-0 ${colors[state][0]}`;
+    el('face-status').className = `text-sm font-bold ${colors[state][1]}`;
+    el('face-status').innerText = text;
+}
+
+function stopFaceStream() {
+    el('face-preview').srcObject = null;
+    if (faceStream) { faceStream.getTracks().forEach(t => t.stop()); faceStream = null; }
+}
+
+// ═══════════════════════════════════════════
+//  STEP 3 — GAZE CALIBRATION
+// ═══════════════════════════════════════════
+function buildDots() {
+    const arena = el('calib-arena');
+    arena.querySelectorAll('.calib-dot').forEach(d => d.remove());
+    calibDone = 0;
+    updateCalibUI();
+    el('calib-hint').style.display = 'none';
+
+    CALIB_POS.forEach(([xPct, yPct], idx) => {
+        const dot = document.createElement('div');
+        dot.className      = 'calib-dot';
+        dot.style.left     = `${xPct}%`;
+        dot.style.top      = `${yPct}%`;
+        dot.dataset.clicks = '0';
+
+        dot.addEventListener('click', () => {
+            if (dot.classList.contains('done')) return;
+            dot.classList.remove('clicked');
+            void dot.offsetWidth;
+            dot.classList.add('clicked');
+
+            const clicks = parseInt(dot.dataset.clicks) + 1;
+            dot.dataset.clicks = clicks;
+
+            // Train WebGazer
+            if (typeof webgazer !== 'undefined') {
+                const r = dot.getBoundingClientRect();
+                webgazer.recordScreenPosition(r.left + r.width/2, r.top + r.height/2, 'click');
+            }
+
+            // Conic fill to show progress on dot
+            const pct = (clicks / CALIB_CLICKS) * 100;
+            dot.style.background = `conic-gradient(#60a5fa ${pct}%, #1e3a8a ${pct}%)`;
+
+            if (clicks >= CALIB_CLICKS) {
+                dot.classList.add('done');
+                dot.style.background = '';
+                calibDone++;
+                updateCalibUI();
+                
+                // Done calibrating!
+                if (calibDone >= CALIB_POS.length) {
+                    const btn = el('btn-start-exam');
+                    btn.disabled = false;
+                    btn.classList.add('glow-ready');
+                    
+                    if (typeof webgazer !== 'undefined') {
+                        webgazer.showVideoPreview(true); // Prepare mini live feed
+                    }
+                }
+            }
+        });
+
+        arena.appendChild(dot);
+    });
+}
+
+function updateCalibUI() {
+    const pct = (calibDone / CALIB_POS.length) * 100;
+    el('calib-bar').style.width = `${pct}%`;
+    el('calib-count').innerText = `${calibDone} / ${CALIB_POS.length} dots`;
+}
+
+// ═══════════════════════════════════════════
+//  BEGIN EXAM
+// ═══════════════════════════════════════════
+function beginExam() {
+    hide('pre-exam-overlay');
+    show('exam-form');
+    
+    const pb = el('proctoring-badge');
+    pb.classList.remove('hidden'); 
+    pb.classList.add('flex');
+    
+    document.body.classList.remove('overflow-hidden');
+    
+    // This flips the switch. The WebGazer listener will now actively issue warnings.
+    isProctoringActive = true; 
+    
+    startTimer();
+}
+
+// ═══════════════════════════════════════════
+//  PROCTORING WARN & STOP
+// ═══════════════════════════════════════════
+function triggerWarning(message) {
+    warningCount++;
+    el('proctor-warning-text').innerText = `Warning ${warningCount}: ${message}`;
+    const w = el('proctor-warning');
+    
+    // Slide banner into view
+    w.style.transform = 'translateX(-50%) translateY(0)';
+    
+    // Slide it back up after 4 seconds
+    setTimeout(() => { w.style.transform = 'translateX(-50%) translateY(-200%)'; }, 4000);
+}
+
+function stopProctoring() {
+    isProctoringActive = false;
+    try { if (typeof webgazer !== 'undefined') { webgazer.pause(); webgazer.end(); } } catch(e) {}
+    const vf = document.getElementById('webgazerVideoFeed');
+    if (vf) vf.remove();
+}
+
+// ═══════════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════════
+function startTimer() {
+    const key = `aura_exam_start_${currentExamId}_${userEmail}`;
+    let startMs = localStorage.getItem(key) || Date.now();
+    if (!localStorage.getItem(key)) localStorage.setItem(key, startMs);
+
+    const durMs      = examDataObj.durationMinutes * 60000;
+    let endMs        = parseInt(startMs) + durMs;
+    const hardStr    = examDataObj.endTime || new Date(new Date(examDataObj.startTime || examDataObj.scheduledDate).getTime() + durMs).toISOString();
+    const hardMs     = new Date(hardStr).getTime();
+    if (hardMs && hardMs < endMs) endMs = hardMs;
+
+    const timerEl = el('exam-timer');
+    timerInterval = setInterval(() => {
+        const rem = endMs - Date.now();
+        if (rem <= 0) {
+            clearInterval(timerInterval);
+            timerEl.innerText = '00:00';
+            timerEl.classList.add('text-red-600');
+            alert("Time is up! Your exam will be auto-submitted.");
+            processSubmission(true);
+        } else {
+            const s = Math.floor(rem / 1000);
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60).toString().padStart(2,'0');
+            const sec = (s % 60).toString().padStart(2,'0');
+            timerEl.innerText = h > 0 ? `${h}:${m}:${sec}` : `${m}:${sec}`;
+            if (s < 300) timerEl.classList.add('text-red-600', 'animate-pulse');
+        }
+    }, 1000);
+}
+
+// ═══════════════════════════════════════════
+//  MISSED / REVIEW / ERROR
+// ═══════════════════════════════════════════
+function showMissed(exam) {
+    setText('missed-exam-title',  exam.title);
+    setText('missed-exam-course', exam.courseName);
+    show('missed-container');
+    hide('proctoring-badge'); hide('timer-wrapper');
+}
+
+function showReview(exam, questions, submission) {
+    setText('exam-title', exam.title); setText('exam-course', exam.courseName);
+    hide('proctoring-badge'); hide('timer-wrapper');
+    const rb = el('review-badge'); rb.classList.remove('hidden'); rb.classList.add('flex');
+
+    const pct = parseFloat(submission.percentage);
+    el('review-score-banner').classList.remove('hidden');
+    setText('review-score-text', `${submission.score} / ${submission.totalQuestions}`);
+    const pe = el('review-percentage-text');
+    pe.innerText = `${pct}%`;
+    pe.className = `text-sm font-bold ${pct >= 50 ? 'text-green-600' : 'text-red-600'}`;
+    setText('review-submitted-at', new Date(submission.submittedAt).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}));
+
+    renderQuestions(questions, submission);
+    hide('submit-bar');
+    el('review-back-bar').classList.remove('hidden');
+    show('exam-form');
+}
+
+function showError(msg) {
+    hide('exam-form');
+    show('error-container');
+    setText('error-message', msg);
+}
+
+// ═══════════════════════════════════════════
+//  RENDER QUESTIONS
+// ═══════════════════════════════════════════
+function renderQuestions(questions, submission) {
+    const isReview = submission !== null;
+    const map = {};
+    if (isReview && submission.answers) submission.answers.forEach(a => { map[a.questionId] = a; });
+
+    el('questions-wrapper').innerHTML = questions.map((q, i) => {
+        const sa = map[q._id] || null;
+        let html = '';
+
+        if (q.type === 'true_false' || q.type === 'mcq') {
+            const opts = q.type === 'true_false' ? ['True','False'] : ((q.options && q.options.length >= 2) ? q.options : ['Option A','Option B','Option C','Option D']);
+            html = opts.map(opt => {
+                if (isReview) {
+                    const sel = sa && sa.answer === opt;
+                    const cor = q.correctAnswers.includes(opt);
+                    let cls = 'bg-slate-50 border-slate-200 text-slate-600', icon = '';
+                    if (sel && sa.isCorrect) {
+                        cls  = 'bg-green-50 border-green-400 text-green-800 ring-1 ring-green-400';
+                        icon = `<svg class="w-4 h-4 text-green-600 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
+                    } else if (sel && !sa.isCorrect) {
+                        cls  = 'bg-red-50 border-red-400 text-red-800 ring-1 ring-red-400';
+                        icon = `<svg class="w-4 h-4 text-red-500 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>`;
+                    } else if (!sel && cor) {
+                        cls  = 'bg-green-50 border-green-300 text-green-700 border-dashed';
+                        icon = `<span class="text-[10px] font-bold text-green-600 ml-auto uppercase tracking-widest">Correct Answer</span>`;
+                    }
+                    return `<div class="flex items-center gap-2 mt-2 px-4 py-3 rounded-lg border ${cls}"><span class="font-medium">${opt}</span>${icon}</div>`;
+                }
+                return `<label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-3 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-200 transition-colors flex-1 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:ring-1 has-[:checked]:ring-blue-600 mt-2"><input type="radio" name="q_${q._id}" value="${opt}" required class="w-4 h-4 text-blue-600"><span class="font-medium">${opt}</span></label>`;
+            }).join('');
+
+            if (!isReview && q.type === 'true_false') html = `<div class="flex gap-4 mt-4">${html}</div>`;
+            else if (isReview) html = `<div class="mt-4 space-y-2">${html}</div>`;
+
+        } else {
+            if (isReview) {
+                const ok = sa && sa.isCorrect;
+                html = `<div class="mt-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Your Answer</p>
+                        ${ok ? `<span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Correct</span>` : `<span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">Incorrect</span>`}
+                    </div>
+                    <div class="px-4 py-3 border rounded-lg ${ok ? 'border-green-300 bg-green-50 text-green-800' : 'border-red-300 bg-red-50 text-red-800'} font-medium text-sm">
+                        ${sa ? sa.answer || '<em class="opacity-60">No answer provided</em>' : '<em class="opacity-60">No answer provided</em>'}
+                    </div>
+                    ${!ok ? `<div class="mt-2"><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Accepted Answer(s)</p><div class="px-4 py-3 border border-green-300 bg-green-50 text-green-800 rounded-lg font-medium text-sm">${q.correctAnswers.join(' / ')}</div></div>` : ''}
+                </div>`;
+            } else {
+                html = `<textarea name="q_${q._id}" required rows="4" class="w-full mt-4 px-4 py-3 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors" placeholder="Type your answer here..."></textarea>`;
+            }
+        }
+
+        const border = isReview && sa ? (sa.isCorrect ? 'border-green-200' : 'border-red-200') : 'border-slate-200';
+        const pill   = isReview && sa ? (sa.isCorrect
+            ? `<span class="ml-auto text-[10px] font-bold px-2 py-1 rounded-full bg-green-100 text-green-700 uppercase tracking-widest">+1</span>`
+            : `<span class="ml-auto text-[10px] font-bold px-2 py-1 rounded-full bg-red-100 text-red-700 uppercase tracking-widest">+0</span>`) : '';
+
+        return `<div class="bg-white p-6 sm:p-8 rounded-xl border ${border} shadow-sm question-block" data-qid="${q._id}">
+            <div class="flex gap-4 items-start">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold flex-shrink-0 text-sm">${i+1}</div>
+                <div class="flex-1">
+                    <div class="flex items-start gap-2">
+                        <h3 class="text-base font-bold text-slate-800 leading-relaxed flex-1">${q.prompt}</h3>${pill}
+                    </div>
+                    <div class="mt-2">${html}</div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════
+//  SUBMIT EXAM
+// ═══════════════════════════════════════════
+async function processSubmission(auto) {
+    if (timerInterval) clearInterval(timerInterval);
+    stopProctoring();
+    const btn = el('btn-submit');
+    if (btn) { btn.innerHTML = 'Submitting...'; btn.disabled = true; }
+
+    const answers = [];
+    document.querySelectorAll('.question-block').forEach(block => {
+        const qId = block.dataset.qid;
+        const inputs = block.querySelectorAll(`[name="q_${qId}"]`);
+        if (!inputs.length) return;
+        let val = inputs[0].type === 'radio'
+            ? (block.querySelector(`input[name="q_${qId}"]:checked`)?.value || '')
+            : inputs[0].value;
+        answers.push({ questionId: qId, answer: val });
+    });
+
+    const res = await ExamService.submitExam(currentExamId, answers);
+    if (res.success) {
+        localStorage.removeItem(`aura_exam_start_${currentExamId}_${userEmail}`);
+        window.location.reload();
+    } else {
+        alert(res.message);
+        if (btn) { btn.innerHTML = 'Submit Assessment'; btn.disabled = false; }
+    }
+}
+</script>
+</body>
+</html>

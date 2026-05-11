@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraExam - Student Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/src/utils/security.js"></script>
+    <script src="/src/services/exam.service.js"></script>
+    <script>
+        if (typeof SecurityGuard !== 'undefined') {
+            SecurityGuard.protectPage('student');
+            SecurityGuard.initProctoring();
+        } else {
+            console.error("SecurityGuard failed to load. Check your server.js static paths.");
+        }
+        function logout() {
+            if (typeof SecurityGuard !== 'undefined') SecurityGuard.logout();
+        }
+    </script>
+</head>
+<body class="bg-slate-50 flex h-screen overflow-hidden font-sans text-slate-800">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col hidden md:flex transition-all duration-300">
+        <div class="h-16 flex items-center px-6 border-b border-slate-100">
+            <div class="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center mr-3 shadow-sm shadow-blue-200">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+            <span class="font-bold text-xl text-blue-900 tracking-tight">AuraExam</span>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <a href="/student-dashboard.html" class="flex items-center px-3 py-2.5 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg transition-colors group">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Dashboard
+            </a>
+            <a href="/student-exams.html" class="flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors group">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                My Exams
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-slate-100">
+            <button onclick="logout()" class="flex items-center w-full px-3 py-2.5 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Log Out
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 z-10">
+            <h2 class="text-lg font-bold text-slate-800">Student Overview</h2>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3 pl-4 border-l border-slate-200">
+                    <div class="text-right hidden sm:block">
+                        <p id="user-name-display" class="text-sm font-bold text-slate-800 leading-tight">Loading...</p>
+                        <p class="text-xs text-slate-500">Student Portal</p>
+                    </div>
+                    <img id="user-avatar" class="w-10 h-10 rounded-full border-2 border-indigo-50" src="https://ui-avatars.com/api/?name=Student&background=6366f1&color=fff" alt="Avatar">
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-8">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-slate-900 leading-tight">Welcome back! 👋</h1>
+                <p class="text-slate-500 mt-1 text-sm">Enroll in classes and monitor your upcoming exams below.</p>
+            </div>
+
+            <!-- STAT CARDS -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Classes</p>
+                    <p id="stat-classes" class="text-2xl font-black text-slate-900">—</p>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Submitted</p>
+                    <p id="stat-submitted" class="text-2xl font-black text-green-600">—</p>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pending</p>
+                    <p id="stat-pending" class="text-2xl font-black text-amber-500">—</p>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Avg Score</p>
+                    <p id="stat-avg" class="text-2xl font-black text-blue-600">—</p>
+                </div>
+            </div>
+
+            <!-- ENROLL WIDGET -->
+            <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 rounded-xl shadow-lg shadow-blue-900/10 text-white mb-8 border border-blue-600">
+                <h3 class="font-bold text-lg mb-1">Join a New Class</h3>
+                <p class="text-blue-100 text-sm mb-4">Enter the 6-character code provided by your lecturer to unlock your assessments.</p>
+                <div class="flex flex-col sm:flex-row gap-3 max-w-xl">
+                    <input type="text" id="input-class-code" maxlength="6" class="flex-1 px-4 py-2.5 rounded-lg text-slate-900 font-mono font-bold uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-400" placeholder="e.g. XJ92LK">
+                    <button id="btn-enroll" class="px-6 py-2.5 bg-white text-blue-800 font-bold rounded-lg hover:bg-slate-50 transition-all shadow-sm whitespace-nowrap active:scale-95">
+                        Enroll Now
+                    </button>
+                </div>
+                <p id="enroll-msg" class="text-sm font-bold mt-3 hidden"></p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-8">
+
+                    <!-- ENROLLED CLASSES -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                My Enrolled Classes
+                            </h3>
+                            <span id="class-count" class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">0</span>
+                        </div>
+                        <div id="enrolled-classes-preview" class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="col-span-full py-6 text-center text-slate-500 text-sm">
+                                <div class="animate-spin inline-block w-5 h-5 border-2 border-current border-t-transparent text-blue-600 rounded-full mb-2"></div>
+                                <p>Loading your classes...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UPCOMING / RECENT EXAMS -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                                Recent Assessments
+                            </h3>
+                            <a href="/student-exams.html" class="text-xs text-blue-700 font-bold hover:underline">View All</a>
+                        </div>
+                        <div id="dashboard-exams-preview" class="divide-y divide-slate-100">
+                            <div class="p-8 text-center">
+                                <div class="animate-spin inline-block w-5 h-5 border-2 border-current border-t-transparent text-blue-600 rounded-full mb-2"></div>
+                                <p class="text-slate-500 text-sm">Loading exams...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Aura System Status</h4>
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-16 h-16 rounded-full border-4 border-slate-100 flex items-center justify-center relative">
+                                <div class="absolute inset-0 rounded-full border-4 border-green-400 border-t-transparent animate-[spin_3s_linear_infinite]"></div>
+                                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-800">System Ready</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Camera and eye-tracking calibration are verified.</p>
+                            </div>
+                        </div>
+                        <button class="w-full py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-xs font-bold transition-colors border border-slate-200 shadow-sm">Test Environment</button>
+                    </div>
+
+                    <!-- Performance summary card (populated after data loads) -->
+                    <div id="performance-card" class="hidden bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Performance Summary</h4>
+                        <div id="performance-list" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof SecurityGuard === 'undefined' || typeof ExamService === 'undefined') {
+                document.getElementById('enrolled-classes-preview').innerHTML =
+                    `<div class="col-span-full bg-red-50 text-red-600 p-4 rounded border border-red-200 text-sm font-medium">Critical Error: Unable to load services. Please check server.js paths.</div>`;
+                return;
+            }
+
+            const userSession = SecurityGuard.getSession();
+            if (userSession && userSession.email) {
+                document.getElementById('user-name-display').textContent = userSession.email.split('@')[0];
+                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${userSession.email}&background=6366f1&color=fff`;
+            }
+
+            await loadDashboardData();
+
+            // Enroll button
+            document.getElementById('btn-enroll').addEventListener('click', handleEnroll);
+            document.getElementById('input-class-code').addEventListener('keydown', e => {
+                if (e.key === 'Enter') handleEnroll();
+            });
+        });
+
+        async function loadDashboardData() {
+            // Fetch everything in parallel
+            const [classRes, examRes, subRes] = await Promise.all([
+                ExamService.getStudentClasses(),
+                ExamService.getStudentExams(),
+                ExamService.getStudentSubmissions()
+            ]);
+
+            const submissions = subRes.success ? subRes.data : [];
+            const exams       = examRes.success ? examRes.data : [];
+            const now         = new Date();
+
+            renderClasses(classRes);
+            renderExams(exams, submissions, now);
+            renderStats(classRes, exams, submissions, now);
+            renderPerformance(exams, submissions);
+        }
+
+        // ─────────────────────────────────────────
+        //  STAT CARDS
+        // ─────────────────────────────────────────
+        function renderStats(classRes, exams, submissions, now) {
+            const classCount = (classRes.success && classRes.data) ? classRes.data.length : 0;
+            document.getElementById('stat-classes').innerText = classCount;
+
+            const submittedCount = submissions.length;
+            document.getElementById('stat-submitted').innerText = submittedCount;
+
+            const pendingCount = exams.filter(exam => {
+                const startTime = new Date(exam.startTime || exam.scheduledDate);
+                const endTime   = new Date(exam.endTime || startTime.getTime() + (exam.durationMinutes * 60000));
+                const hasSubmitted = submissions.some(s => s.examId === exam._id);
+                const isOpen = now >= startTime && now <= endTime;
+                const isActiveManual = exam.status === 'active';
+                return !hasSubmitted && (isOpen || isActiveManual);
+            }).length;
+            document.getElementById('stat-pending').innerText = pendingCount;
+
+            if (submissions.length > 0) {
+                const avg = submissions.reduce((sum, s) => sum + (parseFloat(s.percentage) || 0), 0) / submissions.length;
+                document.getElementById('stat-avg').innerText = avg.toFixed(1) + '%';
+            } else {
+                document.getElementById('stat-avg').innerText = 'N/A';
+            }
+        }
+
+        // ─────────────────────────────────────────
+        //  ENROLLED CLASSES
+        // ─────────────────────────────────────────
+        function renderClasses(response) {
+            const container = document.getElementById('enrolled-classes-preview');
+            const counter   = document.getElementById('class-count');
+
+            if (response.success && response.data && response.data.length > 0) {
+                counter.innerText = response.data.length;
+                container.innerHTML = response.data.map(cls => `
+                    <div class="border border-indigo-100 bg-indigo-50/50 rounded-xl p-4 flex items-center justify-between group hover:border-indigo-300 transition-colors shadow-sm">
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm mb-1">${cls.className}</h4>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] text-slate-500 font-medium">Class Code:</span>
+                                <span class="text-xs font-mono text-indigo-700 font-bold bg-white px-2 py-0.5 rounded border border-indigo-100 shadow-sm">${cls.classCode}</span>
+                            </div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-white border border-indigo-100 flex items-center justify-center text-indigo-400 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                counter.innerText = '0';
+                container.innerHTML = `
+                    <div class="col-span-full py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                        <svg class="w-8 h-8 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        <p class="text-slate-500 text-sm font-medium">You haven't joined any classes yet.</p>
+                        <p class="text-slate-400 text-xs mt-1">Use the widget above to enroll.</p>
+                    </div>`;
+            }
+        }
+
+        // ─────────────────────────────────────────
+        //  EXAM LIST (submission-aware)
+        // ─────────────────────────────────────────
+        function renderExams(exams, submissions, now) {
+            const container = document.getElementById('dashboard-exams-preview');
+
+            if (!exams.length) {
+                container.innerHTML = `<div class="p-8 text-center text-slate-500 text-sm">No active or scheduled exams at this time.</div>`;
+                return;
+            }
+
+            container.innerHTML = exams.slice(0, 5).map(exam => {
+                const startTime    = new Date(exam.startTime || exam.scheduledDate);
+                const endTime      = new Date(exam.endTime || startTime.getTime() + (exam.durationMinutes * 60000));
+                const submission   = submissions.find(s => s.examId === exam._id);
+                const hasSubmitted = !!submission;
+                const isPastDue    = now > endTime;
+                const isOpen       = now >= startTime && now <= endTime;
+                const isActiveManual = exam.status === 'active';
+                const isClosedManual = exam.status === 'completed';
+
+                // Determine state
+                let state = 'scheduled'; // locked
+                if (hasSubmitted)                           state = 'submitted';
+                else if (isPastDue || isClosedManual)       state = 'missed';
+                else if (isOpen || isActiveManual)          state = 'pending';
+
+                // Badge config
+                const badges = {
+                    submitted: { text: 'Submitted',  cls: 'bg-green-100 text-green-700 border-green-200' },
+                    missed:    { text: 'Missed',      cls: 'bg-red-100 text-red-700 border-red-200' },
+                    pending:   { text: 'Pending',     cls: 'bg-amber-100 text-amber-700 border-amber-200 animate-pulse' },
+                    scheduled: { text: 'Scheduled',   cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+                };
+                const badge = badges[state];
+
+                // Icon bg
+                const iconBg = {
+                    submitted: 'bg-green-100 text-green-600',
+                    missed:    'bg-red-100 text-red-500',
+                    pending:   'bg-blue-100 text-blue-700',
+                    scheduled: 'bg-slate-100 text-slate-500',
+                }[state];
+
+                // Right-side action
+                let actionHtml = '';
+                if (state === 'submitted') {
+                    const pct = parseFloat(submission.percentage);
+                    const pctColor = pct >= 50 ? 'text-green-600' : 'text-red-600';
+                    actionHtml = `
+                        <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
+                            <span class="text-xs font-black ${pctColor}">${submission.score}/${submission.totalQuestions} · ${pct}%</span>
+                            <button onclick="window.location.href='/student-take-exam.html?id=${exam._id}'" class="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-all whitespace-nowrap">Review</button>
+                        </div>`;
+                } else if (state === 'missed') {
+                    actionHtml = `
+                        <button onclick="window.location.href='/student-take-exam.html?id=${exam._id}'" class="flex-shrink-0 px-4 py-1.5 bg-slate-200 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-300 transition-all whitespace-nowrap">Details</button>`;
+                } else if (state === 'pending') {
+                    actionHtml = `
+                        <button onclick="window.location.href='/student-take-exam.html?id=${exam._id}'" class="flex-shrink-0 px-4 py-1.5 bg-blue-700 text-white rounded-lg text-xs font-bold shadow-md hover:bg-blue-800 transition-all whitespace-nowrap active:scale-95">Take Exam</button>`;
+                } else {
+                    actionHtml = `
+                        <div class="flex-shrink-0 text-right">
+                            <span class="px-3 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">Locked</span>
+                            <p class="text-[10px] text-slate-400 mt-1">${startTime.toLocaleDateString([], {month: 'short', day: 'numeric'})}</p>
+                        </div>`;
+                }
+
+                return `
+                <div class="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors gap-4">
+                    <div class="flex gap-3 items-center min-w-0">
+                        <div class="w-10 h-10 ${iconBg} rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h4 class="font-bold text-slate-900 text-sm truncate">${exam.courseName}</h4>
+                                <span class="px-2 py-0.5 text-[10px] font-bold rounded-full border ${badge.cls} uppercase tracking-wider flex-shrink-0">${badge.text}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-0.5 truncate">${exam.title} · ${exam.durationMinutes} Mins</p>
+                        </div>
+                    </div>
+                    ${actionHtml}
+                </div>`;
+            }).join('');
+        }
+
+        // ─────────────────────────────────────────
+        //  PERFORMANCE CARD (right column)
+        // ─────────────────────────────────────────
+        function renderPerformance(exams, submissions) {
+            if (!submissions.length) return;
+
+            const card = document.getElementById('performance-card');
+            const list = document.getElementById('performance-list');
+            card.classList.remove('hidden');
+
+            // Show last 3 submissions with their exam title
+            const items = submissions.slice(0, 3).map(sub => {
+                const exam = exams.find(e => e._id === sub.examId);
+                const title = exam ? exam.title : 'Exam';
+                const pct   = parseFloat(sub.percentage);
+                const barColor  = pct >= 75 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-400' : 'bg-red-500';
+                const pctColor  = pct >= 50 ? 'text-green-600' : 'text-red-600';
+
+                return `
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-xs font-bold text-slate-700 truncate max-w-[140px]">${title}</p>
+                        <span class="text-xs font-black ${pctColor}">${pct}%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                        <div class="${barColor} h-1.5 rounded-full transition-all" style="width: ${Math.min(pct, 100)}%"></div>
+                    </div>
+                </div>`;
+            });
+
+            list.innerHTML = items.join('');
+        }
+
+        // ─────────────────────────────────────────
+        //  ENROLLMENT
+        // ─────────────────────────────────────────
+        async function handleEnroll() {
+            const btn      = document.getElementById('btn-enroll');
+            const msg      = document.getElementById('enroll-msg');
+            const codeInput = document.getElementById('input-class-code');
+            const code     = codeInput.value.trim();
+
+            if (!code) return;
+
+            btn.innerHTML  = 'Enrolling...';
+            btn.disabled   = true;
+
+            const res = await ExamService.enrollInClass(code.toUpperCase());
+
+            msg.classList.remove('hidden');
+            if (res.success) {
+                msg.className = 'text-sm font-bold mt-3 text-green-300 flex items-center gap-1';
+                msg.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> ${res.message}`;
+                codeInput.value = '';
+                await loadDashboardData();
+            } else {
+                msg.className = 'text-sm font-bold mt-3 text-red-300 flex items-center gap-1';
+                msg.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> ${res.message}`;
+            }
+
+            btn.innerHTML = 'Enroll Now';
+            btn.disabled  = false;
+            setTimeout(() => msg.classList.add('hidden'), 5000);
+        }
+    </script>
+</body>
+</html>
