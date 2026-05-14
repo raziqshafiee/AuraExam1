@@ -22,20 +22,14 @@ const AuthView = {
 
         if (activeTab === 'login') {
             this.registerForm.classList.add('hidden');
-            this.registerForm.classList.remove('fade-enter-active');
             this.loginForm.classList.remove('hidden');
-            setTimeout(() => this.loginForm.classList.add('fade-enter-active'), 10);
-
-            this.tabLogin.className = "flex-1 py-2 text-sm font-medium rounded-md bg-white shadow-sm text-blue-700 transition-all";
-            this.tabRegister.className = "flex-1 py-2 text-sm font-medium rounded-md text-slate-500 hover:text-slate-700 transition-all";
+            this.tabLogin.className = "tab-active flex-1 pb-3 text-sm text-center cursor-pointer";
+            this.tabRegister.className = "tab-inactive flex-1 pb-3 text-sm text-center cursor-pointer";
         } else {
             this.loginForm.classList.add('hidden');
-            this.loginForm.classList.remove('fade-enter-active');
             this.registerForm.classList.remove('hidden');
-            setTimeout(() => this.registerForm.classList.add('fade-enter-active'), 10);
-
-            this.tabRegister.className = "flex-1 py-2 text-sm font-medium rounded-md bg-white shadow-sm text-blue-700 transition-all";
-            this.tabLogin.className = "flex-1 py-2 text-sm font-medium rounded-md text-slate-500 hover:text-slate-700 transition-all";
+            this.tabRegister.className = "tab-active flex-1 pb-3 text-sm text-center cursor-pointer";
+            this.tabLogin.className = "tab-inactive flex-1 pb-3 text-sm text-center cursor-pointer";
         }
     },
 
@@ -53,7 +47,6 @@ const AuthView = {
     showRedirectOverlay: function(role, url) {
         this.overlay.classList.remove('hidden');
         this.overlayText.innerText = `Connecting to ${role} portal...`;
-        this.overlayUrl.innerText = `Redirecting -> ${url}`;
     },
 
     clearForms: function() {

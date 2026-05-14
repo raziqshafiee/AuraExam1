@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraExam - Notes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','system-ui','sans-serif']}}}}</script>
+    <script src="/src/utils/security.js"></script>
+    <script src="/src/services/note.service.js"></script>
+    <script>
+        if (typeof SecurityGuard !== 'undefined') SecurityGuard.protectPage('lecturer');
+    </script>
+    <style>
+        #upload-zone { transition: border-color 150ms, background 150ms; }
+        #upload-zone:hover { border-color: #1D3461; background: #F0F4FF; }
+        .progress-bar { transition: width 200ms linear; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden font-sans" style="background:#F8F7F4;color:#111111;">
+
+    <!-- Sidebar -->
+    <aside class="w-64 flex flex-col hidden md:flex flex-shrink-0" style="background:#111111;">
+        <div class="h-16 flex items-center px-4" style="border-bottom:1px solid rgba(255,255,255,0.07);">
+            <img src="/src/assets/logo.png" alt="AuraExam" class="h-8 w-auto">
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
+            <a href="/src/views/lecturer-dashboard.html" class="flex items-center px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Dashboard Overview
+            </a>
+            <div>
+                <button onclick="toggleSubmenu('menu-classes')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);background:transparent;border:none;cursor:pointer;" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        Class Management
+                    </div>
+                    <svg id="menu-classes-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="menu-classes" class="hidden mt-0.5 space-y-0.5 pl-10 pr-2">
+                    <a href="/src/views/lecturer-classes.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">Active Classes</a>
+                </div>
+            </div>
+            <div>
+                <button onclick="toggleSubmenu('menu-exams')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);background:transparent;border:none;cursor:pointer;" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Assessments
+                    </div>
+                    <svg id="menu-exams-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="menu-exams" class="hidden mt-0.5 space-y-0.5 pl-10 pr-2">
+                    <a href="/src/views/lecturer-schedule-exam.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">+ Schedule Exam</a>
+                    <a href="/src/views/lecturer-exams.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">Manage Exams</a>
+                    <a href="/src/views/lecturer-questions.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">Question Bank</a>
+                </div>
+            </div>
+            <a href="/src/views/lecturer-analytics.html" class="flex items-center px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Analytics & Reports
+            </a>
+            <a href="/src/views/lecturer-notes.html" class="flex items-center px-3 py-2.5 text-sm font-semibold text-white rounded" style="background:rgba(255,255,255,0.1);">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                Notes
+            </a>
+        </nav>
+        <div class="p-3" style="border-top:1px solid rgba(255,255,255,0.07);">
+            <button onclick="if(typeof SecurityGuard!=='undefined')SecurityGuard.logout()" class="flex items-center w-full px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);background:transparent;border:none;cursor:pointer;" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fca5a5'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Sign Out
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header class="h-16 flex items-center justify-between px-8 flex-shrink-0" style="background:#fff;border-bottom:1px solid #E5E1DA;">
+            <h2 class="text-sm font-bold uppercase tracking-widest" style="color:#8A8A8A;">Notes & Announcements</h2>
+            <div class="flex items-center gap-4">
+                <p id="lecturer-name" class="text-sm font-bold" style="color:#111111;">Loading...</p>
+                <img id="lecturer-avatar" class="w-8 h-8 rounded-full border-2" style="border-color:#E5E1DA;" src="" alt="Avatar">
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-8" style="background:#F8F7F4;">
+
+            <!-- Create / Edit Note Form -->
+            <div class="mb-10">
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold" id="form-heading" style="color:#111111;">Post a Note</h1>
+                        <p class="text-sm mt-1" style="color:#8A8A8A;">Visible to all enrolled students in the selected class.</p>
+                    </div>
+                    <button id="btn-cancel-edit" class="hidden px-4 py-2 text-sm font-bold rounded" style="background:#F8F7F4;color:#525252;border:1px solid #E5E1DA;cursor:pointer;" onclick="cancelEdit()">Cancel Edit</button>
+                </div>
+
+                <div class="bg-white rounded p-6" style="border:1px solid #E5E1DA;max-width:720px;">
+                    <input type="hidden" id="edit-id">
+                    <div class="space-y-5">
+
+                        <!-- Class -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest mb-1.5" style="color:#8A8A8A;">Class</label>
+                            <select id="form-class" class="w-full px-3 py-2.5 rounded outline-none text-sm" style="border:1px solid #E5E1DA;background:#F8F7F4;color:#111111;">
+                                <option value="" disabled selected>Loading classes...</option>
+                            </select>
+                        </div>
+
+                        <!-- Title -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest mb-1.5" style="color:#8A8A8A;">Title</label>
+                            <input type="text" id="form-title" maxlength="80" placeholder="e.g. Assignment 2 guidelines" class="w-full px-3 py-2.5 rounded outline-none text-sm" style="border:1px solid #E5E1DA;background:#F8F7F4;color:#111111;">
+                        </div>
+
+                        <!-- Body -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest mb-1.5" style="color:#8A8A8A;">Body</label>
+                            <textarea id="form-body" rows="5" placeholder="Write your note or announcement here..." class="w-full px-3 py-2.5 rounded outline-none text-sm" style="border:1px solid #E5E1DA;background:#F8F7F4;color:#525252;resize:vertical;font-family:inherit;"></textarea>
+                        </div>
+
+                        <!-- Attachment upload -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest mb-1.5" style="color:#8A8A8A;">
+                                Attachment <span class="normal-case font-normal tracking-normal" style="color:#8A8A8A;">— optional, max 100 MB</span>
+                            </label>
+
+                            <!-- Drop zone -->
+                            <div id="upload-zone"
+                                 class="rounded-lg p-6 text-center cursor-pointer"
+                                 style="border:2px dashed #E5E1DA;background:#F8F7F4;"
+                                 onclick="document.getElementById('file-input').click()"
+                                 ondragover="event.preventDefault();this.style.borderColor='#1D3461';this.style.background='#EEF2FF'"
+                                 ondragleave="this.style.borderColor='#E5E1DA';this.style.background='#F8F7F4'"
+                                 ondrop="handleFileDrop(event)">
+                                <input type="file" id="file-input" class="hidden"
+                                       accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.mp4,.webm,.mov,.avi,.mp3,.wav,.ogg,.jpg,.jpeg,.png,.gif,.webp,.zip,.txt"
+                                       onchange="handleFileSelect(this.files[0])">
+                                <svg class="w-10 h-10 mx-auto mb-3" style="color:#E5E1DA;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                                <p class="text-sm font-semibold" style="color:#8A8A8A;">Click or drag &amp; drop to upload</p>
+                                <p class="text-xs mt-1.5" style="color:#8A8A8A;">PDF · Word · PowerPoint · Excel · MP4 · MP3 · Image · ZIP</p>
+                            </div>
+
+                            <!-- Uploading state -->
+                            <div id="upload-progress" class="hidden mt-3 rounded-lg p-4" style="border:1px solid #E5E1DA;background:#F8F7F4;">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 flex-shrink-0" style="border-color:#1D3461;"></div>
+                                    <div class="flex-1 min-w-0">
+                                        <p id="progress-filename" class="text-sm font-semibold truncate" style="color:#111111;"></p>
+                                        <p id="progress-pct" class="text-xs" style="color:#8A8A8A;">Uploading…</p>
+                                    </div>
+                                </div>
+                                <div class="rounded-full overflow-hidden" style="background:#E5E1DA;height:4px;">
+                                    <div id="progress-bar" class="progress-bar h-full rounded-full" style="background:#1D3461;width:0%;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Upload success -->
+                            <div id="upload-done" class="hidden mt-3 rounded-lg p-4 flex items-center gap-3" style="border:1px solid #A7F3D0;background:#ECFDF5;">
+                                <div id="file-type-icon" class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-xs font-black" style="background:#059669;"></div>
+                                <div class="flex-1 min-w-0">
+                                    <p id="done-filename" class="text-sm font-bold truncate" style="color:#065F46;"></p>
+                                    <p id="done-filesize" class="text-xs" style="color:#059669;"></p>
+                                </div>
+                                <button onclick="clearAttachment()" class="flex-shrink-0 text-xs font-bold px-2.5 py-1.5 rounded transition-colors" style="background:#F8F7F4;color:#6B7280;border:1px solid #E5E1DA;cursor:pointer;" onmouseover="this.style.color='#DC2626';this.style.borderColor='#FECACA'" onmouseout="this.style.color='#6B7280';this.style.borderColor='#E5E1DA'">Remove</button>
+                            </div>
+
+                            <!-- Existing attachment (edit mode) -->
+                            <div id="existing-attachment" class="hidden mt-3 rounded-lg p-4 flex items-center gap-3" style="border:1px solid #E5E1DA;background:#F8F7F4;">
+                                <svg class="w-5 h-5 flex-shrink-0" style="color:#1D3461;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                <p id="existing-filename" class="text-sm font-semibold flex-1 truncate" style="color:#111111;"></p>
+                                <span class="text-xs" style="color:#8A8A8A;">Upload above to replace</span>
+                            </div>
+
+                            <!-- Hidden storage -->
+                            <input type="hidden" id="form-attachment-url">
+                            <input type="hidden" id="form-attachment-name">
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="flex items-center justify-between pt-1">
+                            <p id="form-msg" class="hidden text-sm font-semibold"></p>
+                            <button id="btn-submit" onclick="submitNote()" class="ml-auto px-5 py-2.5 text-sm font-bold text-white rounded transition-colors" style="background:#111111;border:none;cursor:pointer;" onmouseover="this.style.background='#1D3461'" onmouseout="this.style.background='#111111'">
+                                Post Note
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Notes List -->
+            <div>
+                <h2 class="text-xl font-bold mb-5" style="color:#111111;">My Notes</h2>
+                <div id="notes-list">
+                    <p class="text-sm" style="color:#8A8A8A;">Loading...</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        let classMap     = {};
+        let uploadedUrl  = '';
+        let uploadedName = '';
+
+        const FILE_TYPE_LABELS = {
+            pdf:  'PDF',  doc: 'DOC', docx: 'DOC', ppt: 'PPT', pptx: 'PPT',
+            xls:  'XLS',  xlsx: 'XLS', mp4: '▶', webm: '▶', mov: '▶', avi: '▶',
+            mp3:  '♫',   wav: '♫',  ogg: '♫',  jpg: 'IMG', jpeg: 'IMG',
+            png:  'IMG',  gif: 'IMG', webp: 'IMG', zip: 'ZIP', txt: 'TXT'
+        };
+        const FILE_TYPE_COLORS = {
+            pdf: '#DC2626', doc: '#2563EB', docx: '#2563EB', ppt: '#D97706', pptx: '#D97706',
+            xls: '#059669', xlsx: '#059669', mp4: '#7C3AED', webm: '#7C3AED', mov: '#7C3AED',
+            avi: '#7C3AED', mp3: '#9D174D', wav: '#9D174D', ogg: '#9D174D',
+            jpg: '#0284C7', jpeg: '#0284C7', png: '#0284C7', gif: '#0284C7', webp: '#0284C7',
+            zip: '#B45309', txt: '#374151'
+        };
+
+        function fileExt(name) { return (name || '').split('.').pop().toLowerCase(); }
+
+        function fileTypeIcon(name) {
+            const ext   = fileExt(name);
+            const label = FILE_TYPE_LABELS[ext] || ext.toUpperCase().slice(0, 4) || '?';
+            const color = FILE_TYPE_COLORS[ext] || '#8A8A8A';
+            return { label, color };
+        }
+
+        function formatBytes(b) {
+            if (b < 1024) return `${b} B`;
+            if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+            return `${(b / (1024 * 1024)).toFixed(1)} MB`;
+        }
+
+        function toggleSubmenu(id) {
+            const menu = document.getElementById(id);
+            const icon = document.getElementById(id + '-icon');
+            if (menu) menu.classList.toggle('hidden');
+            if (icon) icon.classList.toggle('rotate-180');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof SecurityGuard !== 'undefined') {
+                const session = SecurityGuard.getSession();
+                if (session) {
+                    document.getElementById('lecturer-name').textContent = session.name || session.email.split('@')[0];
+                    document.getElementById('lecturer-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(session.name || session.email)}&background=1D3461&color=fff`;
+                }
+            }
+            await Promise.all([loadClasses(), loadMyNotes()]);
+        });
+
+        async function loadClasses() {
+            try {
+                const token = localStorage.getItem('aura_token');
+                const r     = await fetch('/api/classes/lecturer', { headers: { 'Authorization': `Bearer ${token}` } });
+                const data  = await r.json();
+                const sel   = document.getElementById('form-class');
+                if (data.success && data.data.length) {
+                    data.data.forEach(c => { classMap[c._id] = c.className; });
+                    sel.innerHTML = `<option value="" disabled selected>Select a class…</option>` +
+                        data.data.map(c => `<option value="${c._id}">${escHtml(c.className)}</option>`).join('');
+                } else {
+                    sel.innerHTML = `<option value="" disabled selected>No classes found</option>`;
+                }
+            } catch {}
+        }
+
+        async function loadMyNotes() {
+            const list = document.getElementById('notes-list');
+            const res  = await NoteService.getLecturerNotes();
+            if (!res.success || !res.data.length) {
+                list.innerHTML = `
+                    <div class="py-12 text-center rounded" style="border:2px dashed #E5E1DA;">
+                        <svg class="w-8 h-8 mx-auto mb-2" style="color:#E5E1DA;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        <p class="text-sm font-medium" style="color:#8A8A8A;">No notes posted yet.</p>
+                    </div>`;
+                return;
+            }
+            list.innerHTML = `<div class="space-y-3">${res.data.map(renderNoteRow).join('')}</div>`;
+        }
+
+        function renderNoteRow(note) {
+            const className = classMap[note.linkedTo && note.linkedTo.id] || '—';
+            const dateStr   = new Date(note.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+            const viewCount = Array.isArray(note.views) ? note.views.length : 0;
+
+            let attachBadge = '';
+            if (note.attachmentName) {
+                const { label, color } = fileTypeIcon(note.attachmentName);
+                attachBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded text-white" style="background:${color};">${label}</span>`;
+            }
+
+            return `
+            <div class="bg-white rounded p-5" style="border:1px solid #E5E1DA;">
+                <div class="flex items-start gap-4">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <h4 class="font-bold text-sm" style="color:#111111;">${escHtml(note.title)}</h4>
+                            ${attachBadge}
+                        </div>
+                        ${note.body ? `<p class="text-xs leading-relaxed mb-2" style="color:#525252;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escHtml(note.body)}</p>` : ''}
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="text-[10px] font-semibold uppercase tracking-widest" style="color:#8A8A8A;">${escHtml(className)}</span>
+                            <span class="text-[10px]" style="color:#8A8A8A;">${dateStr}</span>
+                            <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#8A8A8A;">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                ${viewCount} view${viewCount !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <button onclick="openEdit(${JSON.stringify(note).replace(/"/g,'&quot;')})" class="text-xs font-semibold px-3 py-1.5 rounded transition-colors" style="background:#F8F7F4;color:#1D3461;border:1px solid #E5E1DA;cursor:pointer;" onmouseover="this.style.background='#EEF0F6'" onmouseout="this.style.background='#F8F7F4'">Edit</button>
+                        <button onclick="deleteNote('${note._id}')" class="text-xs font-semibold px-3 py-1.5 rounded transition-colors" style="background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;cursor:pointer;" onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='#FEF2F2'">Delete</button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // ── File upload ─────────────────────────────────
+
+        function handleFileDrop(e) {
+            e.preventDefault();
+            const zone = document.getElementById('upload-zone');
+            zone.style.borderColor = '#E5E1DA';
+            zone.style.background  = '#F8F7F4';
+            const file = e.dataTransfer.files[0];
+            if (file) handleFileSelect(file);
+        }
+
+        function handleFileSelect(file) {
+            if (!file) return;
+            startUpload(file);
+        }
+
+        async function startUpload(file) {
+            document.getElementById('upload-zone').classList.add('hidden');
+            document.getElementById('upload-progress').classList.remove('hidden');
+            document.getElementById('upload-done').classList.add('hidden');
+            document.getElementById('progress-filename').textContent = file.name;
+            document.getElementById('progress-pct').textContent = 'Uploading…';
+            document.getElementById('progress-bar').style.width = '0%';
+
+            const data = await NoteService.uploadFile(file, (pct) => {
+                document.getElementById('progress-bar').style.width = `${pct}%`;
+                document.getElementById('progress-pct').textContent = `${pct}%`;
+            });
+
+            document.getElementById('upload-progress').classList.add('hidden');
+
+            if (data && data.success) {
+                uploadedUrl  = data.url;
+                uploadedName = data.name;
+                document.getElementById('form-attachment-url').value  = uploadedUrl;
+                document.getElementById('form-attachment-name').value = uploadedName;
+
+                const { label, color } = fileTypeIcon(data.name);
+                const iconEl = document.getElementById('file-type-icon');
+                iconEl.textContent = label;
+                iconEl.style.background = color;
+                document.getElementById('done-filename').textContent = data.name;
+                document.getElementById('done-filesize').textContent = formatBytes(data.size);
+                document.getElementById('upload-done').classList.remove('hidden');
+                document.getElementById('existing-attachment').classList.add('hidden');
+            } else {
+                clearAttachment();
+                showMsg((data && data.message) || 'Upload failed.', '#DC2626');
+            }
+        }
+
+        function clearAttachment() {
+            uploadedUrl  = '';
+            uploadedName = '';
+            document.getElementById('form-attachment-url').value  = '';
+            document.getElementById('form-attachment-name').value = '';
+            document.getElementById('upload-done').classList.add('hidden');
+            document.getElementById('upload-progress').classList.add('hidden');
+            document.getElementById('upload-zone').classList.remove('hidden');
+            document.getElementById('file-input').value = '';
+        }
+
+        // ── Form submit ───────────────────────────────────
+
+        async function submitNote() {
+            const classId        = document.getElementById('form-class').value;
+            const title          = document.getElementById('form-title').value.trim();
+            const body           = document.getElementById('form-body').value.trim();
+            const attachmentUrl  = document.getElementById('form-attachment-url').value;
+            const attachmentName = document.getElementById('form-attachment-name').value;
+            const editId         = document.getElementById('edit-id').value;
+
+            if (!classId || !title) { showMsg('Please select a class and add a title.', '#DC2626'); return; }
+
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.textContent = editId ? 'Saving…' : 'Posting…';
+
+            const payload = { title, body, attachmentUrl, attachmentName, linkedTo: { type: 'class', id: classId } };
+            const res = editId
+                ? await NoteService.updateNote(editId, payload)
+                : await NoteService.createNote(payload);
+
+            btn.disabled    = false;
+            btn.textContent = editId ? 'Save Changes' : 'Post Note';
+
+            if (res.success) {
+                showMsg(editId ? 'Note updated.' : 'Note posted.', '#059669');
+                resetForm();
+                await loadMyNotes();
+            } else {
+                showMsg(res.message || 'Failed.', '#DC2626');
+            }
+            setTimeout(() => document.getElementById('form-msg').classList.add('hidden'), 4000);
+        }
+
+        function openEdit(note) {
+            document.getElementById('edit-id').value   = note._id;
+            document.getElementById('form-title').value = note.title;
+            document.getElementById('form-body').value  = note.body || '';
+            if (note.linkedTo && note.linkedTo.id) document.getElementById('form-class').value = note.linkedTo.id;
+
+            clearAttachment();
+
+            if (note.attachmentUrl) {
+                document.getElementById('form-attachment-url').value  = note.attachmentUrl;
+                document.getElementById('form-attachment-name').value = note.attachmentName || '';
+                document.getElementById('existing-filename').textContent = note.attachmentName || note.attachmentUrl;
+                document.getElementById('existing-attachment').classList.remove('hidden');
+            }
+
+            document.getElementById('form-heading').textContent     = 'Edit Note';
+            document.getElementById('btn-submit').textContent       = 'Save Changes';
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEdit() { resetForm(); }
+
+        function resetForm() {
+            document.getElementById('edit-id').value    = '';
+            document.getElementById('form-title').value = '';
+            document.getElementById('form-body').value  = '';
+            document.getElementById('form-class').value = '';
+            clearAttachment();
+            document.getElementById('existing-attachment').classList.add('hidden');
+            document.getElementById('form-heading').textContent     = 'Post a Note';
+            document.getElementById('btn-submit').textContent       = 'Post Note';
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            document.getElementById('form-msg').classList.add('hidden');
+        }
+
+        async function deleteNote(id) {
+            if (!confirm('Delete this note? Students will no longer see it.')) return;
+            const res = await NoteService.deleteNote(id);
+            if (res.success) await loadMyNotes();
+        }
+
+        function showMsg(text, color) {
+            const el = document.getElementById('form-msg');
+            el.textContent = text;
+            el.style.color = color;
+            el.classList.remove('hidden');
+        }
+
+        function escHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+    </script>
+</body>
+</html>

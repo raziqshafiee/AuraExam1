@@ -1,0 +1,17 @@
+{
+  "name": "auraexam",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "concurrently --names \"AUTH,EXAM,TRACK,NOTE,GATEWAY\" --prefix-colors \"blue,green,yellow,cyan,magenta\" \"npm start --prefix backend/auth-service\" \"npm start --prefix backend/exam-service\" \"npm start --prefix backend/tracking-service\" \"npm start --prefix backend/note-service\" \"npm start --prefix backend/api-gateway\"",
+    "gateway": "npm start --prefix backend/api-gateway",
+    "auth": "npm start --prefix backend/auth-service",
+    "exam": "npm start --prefix backend/exam-service",
+    "tracking": "npm start --prefix backend/tracking-service"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}

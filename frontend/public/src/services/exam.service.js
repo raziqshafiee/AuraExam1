@@ -1,13 +1,22 @@
 const ExamService = {
-    // Base API URL for all exam/class requests
-    baseUrl: 'http://localhost:5001/api',
+    baseUrl: '/api',
+
+    _getHeaders() {
+        const token = localStorage.getItem('aura_token');
+        return {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        };
+    },
 
     async getStudentExams() {
         try {
             const session = JSON.parse(localStorage.getItem('aura_user_session'));
             const studentId = session && session.email ? session.email : 'unknown';
 
-            const response = await fetch(`${this.baseUrl}/exams/student/${studentId}`);
+            const response = await fetch(`${this.baseUrl}/exams/student/${studentId}`, {
+                headers: this._getHeaders()
+            });
             return await response.json();
         } catch (error) {
             return { success: false, message: "Database connection failed." };
@@ -19,7 +28,9 @@ const ExamService = {
             const session = JSON.parse(localStorage.getItem('aura_user_session'));
             const studentId = session && session.email ? session.email : 'unknown';
 
-            const response = await fetch(`${this.baseUrl}/classes/student/${studentId}`);
+            const response = await fetch(`${this.baseUrl}/classes/student/${studentId}`, {
+                headers: this._getHeaders()
+            });
             return await response.json();
         } catch (error) {
             return { success: false, message: "Failed to fetch enrolled classes." };
@@ -33,7 +44,7 @@ const ExamService = {
 
             const response = await fetch(`${this.baseUrl}/exams/enroll`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this._getHeaders(),
                 body: JSON.stringify({ classCode, studentId })
             });
             return await response.json();
@@ -42,25 +53,28 @@ const ExamService = {
         }
     },
 
-    // ADD THESE TWO FUNCTIONS:
-     async getExamToTake(examId) {
+    async getExamToTake(examId) {
         try {
             const session = JSON.parse(localStorage.getItem('aura_user_session'));
             const studentId = session && session.email ? session.email : 'unknown';
 
-            const response = await fetch(`${this.baseUrl}/exams/${examId}/take/${studentId}`);
+            const response = await fetch(`${this.baseUrl}/exams/${examId}/take/${studentId}`, {
+                headers: this._getHeaders()
+            });
             return await response.json();
         } catch (error) {
             return { success: false, message: "Failed to load the exam." };
         }
     },
 
-     async getStudentSubmissions() {
+    async getStudentSubmissions() {
         try {
             const session = JSON.parse(localStorage.getItem('aura_user_session'));
             const studentId = session && session.email ? session.email : 'unknown';
 
-            const response = await fetch(`${this.baseUrl}/submissions/student/${studentId}`);
+            const response = await fetch(`${this.baseUrl}/submissions/student/${studentId}`, {
+                headers: this._getHeaders()
+            });
             return await response.json();
         } catch (error) {
             return { success: false, data: [] };
@@ -74,7 +88,7 @@ const ExamService = {
 
             const response = await fetch(`${this.baseUrl}/exams/submit`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this._getHeaders(),
                 body: JSON.stringify({ examId, studentId, answers })
             });
             return await response.json();

@@ -1,151 +1,176 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraExam - Analytics & Reports</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','system-ui','sans-serif']}}}}</script>
     <script src="/src/utils/security.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         if (typeof SecurityGuard !== 'undefined') SecurityGuard.protectPage('lecturer');
     </script>
 </head>
-<body class="bg-slate-50 flex h-screen overflow-hidden font-sans text-slate-800">
+<body class="flex h-screen overflow-hidden font-sans" style="background:#F8F7F4;color:#111111;">
 
-    <aside class="w-64 bg-indigo-900 text-indigo-100 flex flex-col hidden md:flex transition-all duration-300">
-        <div class="h-16 flex items-center px-6 bg-indigo-950/40 border-b border-indigo-800">
-            <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mr-3 shadow-sm">
-                <svg class="w-5 h-5 text-indigo-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1h2a1 1 0 011-1v5m-4 0h4"></path></svg>
-            </div>
-            <span class="font-bold text-xl text-white tracking-tight">AuraExam</span>
+    <aside class="w-64 flex flex-col hidden md:flex flex-shrink-0" style="background:#111111;">
+        <div class="h-16 flex items-center px-4" style="border-bottom:1px solid rgba(255,255,255,0.07);">
+            <img src="/src/assets/logo.png" alt="AuraExam" class="h-8 w-auto">
         </div>
 
-        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
-            <a href="/lecturer-dashboard.html" class="flex items-center px-3 py-2.5 text-sm font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white transition-colors">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
+            <a href="/src/views/lecturer-dashboard.html" class="flex items-center px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 Dashboard Overview
             </a>
-            
+
             <div>
-                <button onclick="toggleSubmenu('menu-classes')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white transition-colors">
+                <button onclick="toggleSubmenu('menu-classes')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);background:transparent;border:none;cursor:pointer;" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         Class Management
                     </div>
                     <svg id="menu-classes-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                <div id="menu-classes" class="hidden mt-1 space-y-1 pl-11 pr-2">
-                    <a href="/lecturer-classes.html" class="block px-3 py-2 text-xs font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white">Active Classes</a>
+                <div id="menu-classes" class="hidden mt-0.5 space-y-0.5 pl-10 pr-2">
+                    <a href="/src/views/lecturer-classes.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">Active Classes</a>
                 </div>
             </div>
 
             <div>
-                <button onclick="toggleSubmenu('menu-exams')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white transition-colors">
+                <button onclick="toggleSubmenu('menu-exams')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);background:transparent;border:none;cursor:pointer;" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Assessments
                     </div>
                     <svg id="menu-exams-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                <div id="menu-exams" class="hidden mt-1 space-y-1 pl-11 pr-2">
-                    <a href="/lecturer-schedule-exam.html" class="block px-3 py-2 text-xs font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white">+ Schedule Exam</a>
-                    <a href="/lecturer-exams.html" class="block px-3 py-2 text-xs font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white">Manage Exams</a>
-                    <a href="/lecturer-questions.html" class="block px-3 py-2 text-xs font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white">Question Bank</a>
+                <div id="menu-exams" class="hidden mt-0.5 space-y-0.5 pl-10 pr-2">
+                    <a href="/src/views/lecturer-schedule-exam.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">+ Schedule Exam</a>
+                    <a href="/src/views/lecturer-exams.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">Manage Exams</a>
+                    <a href="/src/views/lecturer-questions.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">Question Bank</a>
                 </div>
             </div>
 
-            <a href="/lecturer-analytics.html" class="flex items-center px-3 py-2.5 text-sm font-semibold text-white bg-indigo-800 rounded-lg transition-colors shadow-sm group">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <a href="/src/views/lecturer-analytics.html" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded transition-colors text-white" style="background:rgba(255,255,255,0.1);">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 Analytics & Reports
+            </a>
+            <a href="/src/views/lecturer-notes.html" class="flex items-center px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                My Notes
             </a>
         </nav>
 
-        <div class="p-4 border-t border-indigo-800">
-            <button onclick="if (typeof SecurityGuard !== 'undefined') SecurityGuard.logout()" class="flex items-center w-full px-3 py-2.5 text-sm font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white transition-colors">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        <div class="p-3" style="border-top:1px solid rgba(255,255,255,0.07);">
+            <button onclick="if (typeof SecurityGuard !== 'undefined') SecurityGuard.logout()" class="flex items-center w-full px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);background:transparent;border:none;cursor:pointer;" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fca5a5'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 Sign Out
             </button>
         </div>
     </aside>
 
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 z-10">
-            <h2 class="text-lg font-bold text-slate-800">Analytics & Reports</h2>
+        <header class="h-16 flex items-center justify-between px-8 flex-shrink-0" style="background:#fff;border-bottom:1px solid #E5E1DA;">
+            <h2 class="text-sm font-bold uppercase tracking-widest" style="color:#8A8A8A;">Analytics & Reports</h2>
             <div class="flex items-center gap-4">
-                <p id="lecturer-name" class="text-sm font-bold text-slate-800">Loading...</p>
-                <img id="lecturer-avatar" class="w-8 h-8 rounded-full border-2 border-indigo-100" src="" alt="Avatar">
+                <p id="lecturer-name" class="text-sm font-bold" style="color:#111111;">Loading...</p>
+                <img id="lecturer-avatar" class="w-8 h-8 rounded-full border-2" style="border-color:#E5E1DA;" src="" alt="Avatar">
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-8 bg-slate-50">
+        <main class="flex-1 overflow-y-auto p-8">
             <div class="mb-8">
-                <h1 class="text-2xl font-bold text-slate-900 leading-tight">Performance Overview</h1>
-                <p class="text-slate-500 text-sm mt-1">Track student success rates and identify areas for improvement.</p>
+                <h1 class="text-2xl font-bold leading-tight" style="color:#111111;">Performance Overview</h1>
+                <p class="text-sm mt-1" style="color:#8A8A8A;">Track student success rates and identify areas for improvement.</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div class="bg-white p-6 rounded flex items-center justify-between" style="border:1px solid #E5E1DA;">
                     <div>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Average Score</p>
-                        <h3 id="stat-avg" class="text-3xl font-bold text-blue-600">0%</h3>
+                        <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:#8A8A8A;">Average Score</p>
+                        <h3 id="stat-avg" class="text-3xl font-bold" style="color:#1D3461;">0%</h3>
                     </div>
-                    <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background:#F8F7F4;color:#1D3461;"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
                 </div>
-                
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+
+                <div class="bg-white p-6 rounded flex items-center justify-between" style="border:1px solid #E5E1DA;">
                     <div>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Overall Pass Rate</p>
+                        <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:#8A8A8A;">Overall Pass Rate</p>
                         <h3 id="stat-pass" class="text-3xl font-bold text-green-600">0%</h3>
                     </div>
-                    <div class="w-12 h-12 bg-green-50 text-green-500 rounded-full flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background:#f0fdf4;color:#16a34a;"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div class="bg-white p-6 rounded flex items-center justify-between" style="border:1px solid #E5E1DA;">
                     <div>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Submissions</p>
-                        <h3 id="stat-subs" class="text-3xl font-bold text-slate-800">0</h3>
+                        <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:#8A8A8A;">Total Submissions</p>
+                        <h3 id="stat-subs" class="text-3xl font-bold" style="color:#111111;">0</h3>
                     </div>
-                    <div class="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg></div>
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background:#F8F7F4;color:#1D3461;"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg></div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div class="bg-white p-6 rounded flex items-center justify-between" style="border:1px solid #E5E1DA;">
                     <div>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Active Students</p>
-                        <h3 id="stat-students" class="text-3xl font-bold text-slate-800">0</h3>
+                        <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:#8A8A8A;">Active Students</p>
+                        <h3 id="stat-students" class="text-3xl font-bold" style="color:#111111;">0</h3>
                     </div>
-                    <div class="w-12 h-12 bg-purple-50 text-purple-500 rounded-full flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div>
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background:#faf5ff;color:#9333ea;"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                    <h3 class="font-bold text-slate-800 mb-6">Average Score by Exam</h3>
+
+                <div class="lg:col-span-2 bg-white rounded p-6" style="border:1px solid #E5E1DA;">
+                    <h3 class="font-bold mb-6" style="color:#111111;">Average Score by Exam</h3>
                     <div class="relative h-72 w-full">
                         <canvas id="performanceChart"></canvas>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-                    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                        <h3 class="font-bold text-slate-800">Recent Submissions</h3>
+                <div class="bg-white rounded overflow-hidden flex flex-col" style="border:1px solid #E5E1DA;">
+                    <div class="px-6 py-4" style="border-bottom:1px solid #E5E1DA;background:#F8F7F4;">
+                        <h3 class="font-bold" style="color:#111111;">Recent Submissions</h3>
                     </div>
                     <div class="p-6 flex-1 overflow-y-auto space-y-4" id="recent-activity-container">
-                        <p class="text-center text-slate-400 text-sm py-4">Loading activity...</p>
+                        <p class="text-center text-sm py-4" style="color:#8A8A8A;">Loading activity...</p>
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Integrity Monitoring Section -->
+            <div class="mt-10">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+                    <div>
+                        <h3 class="font-bold text-base" style="color:#111111;">Integrity Monitoring</h3>
+                        <p class="text-xs mt-0.5" style="color:#8A8A8A;">Camera, head pose, and gaze flags recorded during exams.</p>
+                    </div>
+                    <select id="integrity-exam-select" class="px-3 py-2 text-sm rounded outline-none" style="border:1px solid #E5E1DA;background:#F8F7F4;color:#111111;min-width:220px;">
+                        <option value="">Select an exam...</option>
+                    </select>
+                </div>
+                <div id="integrity-container">
+                    <div class="text-center py-12 rounded text-sm" style="background:#fff;border:1px solid #E5E1DA;color:#8A8A8A;">Select an exam above to view proctoring data.</div>
+                </div>
+            </div>
+
+            <!-- Snapshot Lightbox -->
+            <div id="snap-lightbox" class="hidden fixed inset-0 z-[500] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.8);" onclick="document.getElementById('snap-lightbox').classList.add('hidden')">
+                <img id="snap-lightbox-img" class="max-w-lg max-h-[80vh] rounded-xl shadow-2xl object-contain" src="" alt="Snapshot">
             </div>
         </main>
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:5001/api';
+        const API_BASE = '/api';
         let currentLecturer = null;
         let chartInstance = null;
 
-        function toggleSubmenu(id) { 
+        function toggleSubmenu(id) {
             const menu = document.getElementById(id);
             const icon = document.getElementById(id + '-icon');
             if(menu) menu.classList.toggle('hidden');
@@ -157,18 +182,19 @@
                 const session = SecurityGuard.getSession();
                 if (session) {
                     currentLecturer = session;
-                    document.getElementById('lecturer-name').innerText = session.email.split('@')[0];
-                    document.getElementById('lecturer-avatar').src = `https://ui-avatars.com/api/?name=${session.email}&background=4f46e5&color=fff`;
+                    document.getElementById('lecturer-name').innerText = session.name || session.email.split('@')[0];
+                    document.getElementById('lecturer-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(session.name || session.email)}&background=4f46e5&color=fff`;
                     await fetchAnalytics();
+                    await fetchExamsForIntegrity();
                 }
             }
         }
 
         async function fetchAnalytics() {
             try {
-                const res = await fetch(`${API_BASE}/analytics/lecturer?lecturerId=${currentLecturer.email}`);
+                const res = await SecurityGuard.authFetch(`${API_BASE}/analytics/lecturer?lecturerId=${currentLecturer.email}`);
                 const data = await res.json();
-                
+
                 if (data.success) {
                     const { overview, chartData, recentActivity } = data.data;
 
@@ -187,21 +213,21 @@
                         activityContainer.innerHTML = recentActivity.map(act => {
                             const timeAgo = new Date(act.submittedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                             const color = act.percentage >= 50 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
-                            
+
                             return `
-                            <div class="flex items-center gap-4 pb-4 border-b border-slate-100 last:border-0 last:pb-0">
+                            <div class="flex items-center gap-4 pb-4 last:pb-0" style="border-bottom:1px solid #E5E1DA;">
                                 <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs ${color}">
                                     ${act.percentage}%
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-bold text-slate-800 truncate">${act.studentId}</p>
-                                    <p class="text-xs text-slate-500 truncate">${act.examTitle}</p>
+                                    <p class="text-sm font-bold truncate" style="color:#111111;">${act.studentId}</p>
+                                    <p class="text-xs truncate" style="color:#8A8A8A;">${act.examTitle}</p>
                                 </div>
-                                <span class="text-xs text-slate-400 whitespace-nowrap">${timeAgo}</span>
+                                <span class="text-xs whitespace-nowrap" style="color:#8A8A8A;">${timeAgo}</span>
                             </div>`;
                         }).join('');
                     } else {
-                        activityContainer.innerHTML = `<p class="text-center text-slate-400 text-sm py-4">No recent submissions found.</p>`;
+                        activityContainer.innerHTML = `<p class="text-center text-sm py-4" style="color:#8A8A8A;">No recent submissions found.</p>`;
                     }
                 }
             } catch (err) {
@@ -211,7 +237,7 @@
 
         function renderChart(chartData) {
             const ctx = document.getElementById('performanceChart').getContext('2d');
-            
+
             if(chartInstance) chartInstance.destroy();
 
             if (chartData.length === 0) {
@@ -226,8 +252,8 @@
                     datasets: [{
                         label: 'Average Score (%)',
                         data: chartData.map(d => d.avgPercentage),
-                        backgroundColor: 'rgba(79, 70, 229, 0.8)', // Indigo-600
-                        borderRadius: 6,
+                        backgroundColor: 'rgba(29, 52, 97, 0.8)', // VCASS accent #1D3461
+                        borderRadius: 4,
                         barThickness: 24,
                         maxBarThickness: 32
                     }]
@@ -247,7 +273,7 @@
                         y: {
                             beginAtZero: true,
                             max: 100,
-                            grid: { borderDash: [4, 4], color: '#f1f5f9' }
+                            grid: { borderDash: [4, 4], color: '#E5E1DA' }
                         },
                         x: {
                             grid: { display: false }
@@ -255,6 +281,109 @@
                     }
                 }
             });
+        }
+
+        async function fetchExamsForIntegrity() {
+            try {
+                const res = await SecurityGuard.authFetch(`${API_BASE}/exams/all`);
+                const data = await res.json();
+                const sel = document.getElementById('integrity-exam-select');
+                const exams = data.success ? data.data.filter(e => e.lecturerId === currentLecturer.email) : [];
+                if (exams.length) {
+                    sel.innerHTML = '<option value="">Select an exam...</option>' +
+                        exams.map(e => `<option value="${e._id}">${e.title} — ${e.courseName}</option>`).join('');
+                }
+                sel.addEventListener('change', (ev) => { if (ev.target.value) loadIntegrityData(ev.target.value); });
+            } catch {}
+        }
+
+        async function loadIntegrityData(examId) {
+            const container = document.getElementById('integrity-container');
+            container.innerHTML = `<div class="text-center py-10 text-sm" style="color:#8A8A8A;">Loading proctoring data...</div>`;
+            try {
+                const token = localStorage.getItem('aura_token');
+                const res = await fetch(`${API_BASE}/tracking/exam/${examId}`, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+                const data = await res.json();
+                if (!data.success) { container.innerHTML = `<div class="text-center py-10 text-sm" style="color:#8A8A8A;">No tracking data for this exam.</div>`; return; }
+                renderIntegrityPanel(data.data, examId);
+            } catch {
+                container.innerHTML = `<div class="text-center py-10 text-sm" style="color:#8A8A8A;">Unable to load tracking data.</div>`;
+            }
+        }
+
+        function renderIntegrityPanel(byStudent, examId) {
+            const container = document.getElementById('integrity-container');
+            const students = Object.keys(byStudent);
+            if (!students.length) {
+                container.innerHTML = `<div class="text-center py-10 text-sm" style="color:#8A8A8A;">No proctoring events recorded for this exam.</div>`;
+                return;
+            }
+
+            const cnt = (events, type) => events.filter(e => e.eventType === type).length;
+            const camIcon  = `<svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.869v6.262a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>`;
+            const eyeIcon  = `<svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>`;
+
+            container.innerHTML = students.map(student => {
+                const events = byStudent[student];
+                const camDenied = cnt(events, 'camera_denied');
+                const camOff    = cnt(events, 'camera_off');
+                const headTurn  = cnt(events, 'head_turn');
+                const headDown  = cnt(events, 'head_down');
+                const gazeAway  = cnt(events, 'gaze_away');
+                const faceAbs   = cnt(events, 'face_absent');
+                const tabSw     = cnt(events, 'tab_switch');
+                const winBlur   = cnt(events, 'window_blur');
+                const totalFlags = camDenied + camOff + headTurn + headDown + gazeAway + faceAbs + tabSw + winBlur;
+                const flagColor = totalFlags === 0 ? 'color:#059669' : totalFlags < 5 ? 'color:#D97706' : 'color:#DC2626';
+
+                // Snapshots
+                const snapshots = events.filter(e => e.metadata && e.metadata.snapshotUrl).slice(0, 6);
+                const snapHtml = snapshots.length ? `
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        ${snapshots.map(e => `<img src="${e.metadata.snapshotUrl}" onclick="openSnap(this.src)" class="w-14 h-10 object-cover rounded cursor-pointer border hover:opacity-80 transition-opacity" style="border-color:#E5E1DA;" title="${e.eventType}">`).join('')}
+                    </div>` : '';
+
+                // Timeline
+                const timelineEvents = events.filter(e => e.metadata && e.metadata.examStartMs && e.metadata.examStartMs > 0);
+                let timelineHtml = '';
+                if (timelineEvents.length) {
+                    const startMs = Math.min(...timelineEvents.map(e => e.metadata.examStartMs));
+                    const endMs   = Math.max(...timelineEvents.map(e => new Date(e.timestamp).getTime()));
+                    const span    = Math.max(endMs - startMs, 60000);
+                    const dots = timelineEvents.map(e => {
+                        const pct = Math.min(((new Date(e.timestamp).getTime() - startMs) / span) * 100, 99);
+                        const typeColors = { head_turn:'#D97706', head_down:'#D97706', gaze_away:'#F59E0B', face_absent:'#DC2626', camera_denied:'#7C3AED', camera_off:'#7C3AED', tab_switch:'#059669', window_blur:'#059669' };
+                        return `<div class="absolute top-0 bottom-0 w-1.5 h-1.5 rounded-full my-auto" style="left:${pct}%;background:${typeColors[e.eventType]||'#8A8A8A'};transform:translateX(-50%);" title="${e.eventType}"></div>`;
+                    }).join('');
+                    timelineHtml = `<div class="mt-3"><p class="text-[10px] font-bold uppercase tracking-widest mb-1" style="color:#8A8A8A;">Timeline</p><div class="relative h-3 rounded-full" style="background:#E5E1DA;">${dots}</div></div>`;
+                }
+
+                return `
+                <div class="bg-white rounded mb-4 overflow-hidden" style="border:1px solid #E5E1DA;">
+                    <div class="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-sm truncate" style="color:#111111;">${student}</p>
+                            <p class="text-[10px] font-bold uppercase tracking-widest mt-0.5" style="${flagColor}">${totalFlags} flag${totalFlags !== 1 ? 's' : ''}</p>
+                        </div>
+                        <div class="flex flex-wrap gap-3 text-xs">
+                            <span class="flex items-center gap-1 px-2 py-1 rounded" style="background:#F3F0FF;color:#7C3AED;">${camIcon}Cam denied: <b>${camDenied}</b></span>
+                            <span class="flex items-center gap-1 px-2 py-1 rounded" style="background:#F3F0FF;color:#7C3AED;">${camIcon}Cam off: <b>${camOff}</b></span>
+                            <span class="flex items-center gap-1 px-2 py-1 rounded" style="background:#FEF3C7;color:#92400E;">${eyeIcon}Head turn: <b>${headTurn}</b></span>
+                            <span class="flex items-center gap-1 px-2 py-1 rounded" style="background:#FEF3C7;color:#92400E;">${eyeIcon}Head down: <b>${headDown}</b></span>
+                            <span class="flex items-center gap-1 px-2 py-1 rounded" style="background:#FEF3C7;color:#92400E;">${eyeIcon}Gaze away: <b>${gazeAway}</b></span>
+                            <span class="flex items-center gap-1 px-2 py-1 rounded" style="background:#FEE2E2;color:#991B1B;">${eyeIcon}Face absent: <b>${faceAbs}</b></span>
+                        </div>
+                    </div>
+                    ${snapHtml || timelineHtml ? `<div class="px-5 pb-4">${snapHtml}${timelineHtml}</div>` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        function openSnap(src) {
+            document.getElementById('snap-lightbox-img').src = src;
+            document.getElementById('snap-lightbox').classList.remove('hidden');
         }
 
         document.addEventListener('DOMContentLoaded', initPage);

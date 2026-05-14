@@ -20,14 +20,17 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Password is required'],
-        minlength: 6,
-        select: false // Doesn't return password in queries for safety
-    }
+        minlength: 8,
+        select: false
+    },
+    googleId:    { type: String, select: false },
+    resetCode:   { type: String, select: false },
+    resetExpiry: { type: Date,   select: false }
 }, { timestamps: true });
 
 // Hash password before saving
-UserSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) return next();
+UserSchema.pre('save', async function() {
+    if (!this.isModified('password')) return;
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });

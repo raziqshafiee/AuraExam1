@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraExam - Active Assessment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','system-ui','sans-serif']}}}}</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/src/utils/security.js"></script>
     <script src="/src/services/exam.service.js"></script>
+    <script src="/src/utils/notification-bell.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/webgazer@3.3.0/dist/webgazer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script>
         if (typeof SecurityGuard !== 'undefined') {
             SecurityGuard.protectPage('student');
@@ -15,8 +21,8 @@
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap');
-        * { font-family: 'DM Sans', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-mono { font-family: 'DM Mono', monospace !important; }
 
         /* ── WebGazer mini feed ── */
@@ -74,9 +80,27 @@
             50%      { box-shadow: 0 0 0 14px rgba(22,163,74,0); }
         }
         .glow-ready { animation: glowPulse 1.8s ease-in-out infinite; }
+
+        /* ── PiP Camera ── */
+        #pip-camera {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 160px; height: 120px;
+            border-radius: 8px; border: 2px solid #111111;
+            z-index: 60; object-fit: cover; transform: scaleX(-1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+        }
+
+        /* ── Tracking Toast ── */
+        #track-toast {
+            position: fixed; bottom: 165px; right: 20px;
+            z-index: 70; transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            max-width: 220px;
+        }
+        #track-toast.show { transform: translateX(0); }
     </style>
 </head>
-<body class="bg-slate-100 flex flex-col h-screen text-slate-800 selection:bg-blue-200 relative overflow-hidden">
+<body class="flex flex-col h-screen selection:bg-indigo-200 relative overflow-hidden" style="background:#F8F7F4;color:#111111;">
 
     <!-- ══════════════════════════════════════════
          PROCTORING WARNING BANNER
@@ -92,7 +116,7 @@
     <!-- ══════════════════════════════════════════
          PRE-EXAM OVERLAY (3 Steps: Instructions -> Face -> Calibrate)
     ══════════════════════════════════════════ -->
-    <div id="pre-exam-overlay" class="fixed inset-0 z-[200] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div id="pre-exam-overlay" class="hidden fixed inset-0 z-[200] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden">
 
             <!-- Gradient Header -->
@@ -136,8 +160,8 @@
                     </ul>
                 </div>
                 <div class="flex gap-3">
-                    <a href="/student-exams.html" class="flex-1 py-3 text-center border-2 border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-colors text-sm">Cancel</a>
-                    <button id="btn-to-face-check" class="flex-1 py-3 bg-blue-700 text-white font-bold rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-200 text-sm flex items-center justify-center gap-2">
+                    <a href="/src/views/student-exams.html" class="flex-1 py-3 text-center border-2 border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-colors text-sm">Cancel</a>
+                    <button id="btn-to-face-check" class="flex-1 py-3 bg-indigo-700 text-white font-bold rounded-2xl hover:bg-indigo-800 transition-all shadow-lg shadow-blue-200 text-sm flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                         Enable Camera →
                     </button>
@@ -184,7 +208,7 @@
                 <p class="text-center text-xs text-slate-400">Keep your face visible until the bar is full</p>
 
                 <button id="btn-to-calibration" disabled
-                        class="w-full py-3 bg-blue-700 text-white font-bold rounded-2xl disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all shadow-md text-sm">
+                        class="w-full py-3 bg-indigo-700 text-white font-bold rounded-2xl disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all shadow-md text-sm">
                     Continue to Calibration →
                 </button>
             </div>
@@ -223,9 +247,9 @@
     <!-- ══════════════════════════════════════════
          EXAM HEADER
     ══════════════════════════════════════════ -->
-    <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-50 flex-shrink-0">
+    <header class="h-16 flex items-center justify-between px-6 z-50 flex-shrink-0" style="background:#fff;border-bottom:1px solid #E5E1DA;">
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center">
+            <div class="w-8 h-8 rounded flex items-center justify-center" style="background:#1D3461;">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                 </svg>
@@ -247,6 +271,13 @@
                 </svg>
                 <span class="text-xs font-bold text-indigo-700 uppercase tracking-widest">Review Mode</span>
             </div>
+            <div class="relative">
+                <button id="bell-btn" onclick="toggleBellDropdown()" class="relative w-9 h-9 flex items-center justify-center rounded-full transition-colors" style="background:transparent;border:none;cursor:pointer;" onmouseover="this.style.background='#F8F7F4'" onmouseout="this.style.background='transparent'">
+                    <svg class="w-5 h-5" style="color:#8A8A8A;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    <span id="bell-badge" class="hidden absolute top-1 right-1 w-4 h-4 text-[10px] font-bold text-white flex items-center justify-center rounded-full" style="background:#DC2626;"></span>
+                </button>
+                <div id="bell-dropdown" class="hidden absolute right-0 mt-1 w-80 bg-white rounded-lg shadow-xl z-50" style="border:1px solid #E5E1DA;top:100%;"></div>
+            </div>
             <div id="timer-wrapper" class="text-right">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Time Remaining</p>
                 <p id="exam-timer" class="font-mono font-bold text-xl text-slate-800 leading-tight tracking-wider">--:--</p>
@@ -257,7 +288,7 @@
     <!-- ══════════════════════════════════════════
          MAIN EXAM BODY
     ══════════════════════════════════════════ -->
-    <main class="flex-1 overflow-y-auto p-4 sm:p-8">
+    <main class="flex-1 overflow-y-auto p-4 sm:p-8" style="background:#F8F7F4;">
         <div class="max-w-3xl mx-auto">
 
             <!-- Missed Exam Container -->
@@ -284,7 +315,7 @@
                         <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
                             <strong>Note:</strong> Questions are unavailable for closed exams. Contact your lecturer with concerns.
                         </div>
-                        <a href="/student-exams.html" class="flex items-center justify-center gap-2 w-full py-3.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-all">← Back to My Exams</a>
+                        <a href="/src/views/student-exams.html" class="flex items-center justify-center gap-2 w-full py-3.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-all">← Back to My Exams</a>
                     </div>
                 </div>
             </div>
@@ -294,7 +325,7 @@
                 <svg class="w-12 h-12 mx-auto mb-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 <h2 class="text-xl font-bold mb-2">Access Denied</h2>
                 <p id="error-message" class="text-slate-600 mb-6">You cannot take this exam.</p>
-                <a href="/student-dashboard.html" class="inline-block px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Return to Dashboard</a>
+                <a href="/src/views/student-dashboard.html" class="inline-block px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Return to Dashboard</a>
             </div>
 
             <!-- Active / Review form -->
@@ -321,18 +352,53 @@
                 <!-- Submit Bar -->
                 <div id="submit-bar" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p class="text-sm text-slate-500">Ensure all questions are answered before submitting.</p>
-                    <button type="button" id="btn-submit" class="w-full sm:w-auto px-8 py-3.5 bg-blue-700 text-white font-bold rounded-xl hover:bg-blue-800 transition-all shadow-md active:scale-95 whitespace-nowrap">
+                    <button type="button" id="btn-submit" class="w-full sm:w-auto px-8 py-3.5 bg-indigo-700 text-white font-bold rounded-xl hover:bg-indigo-800 transition-all shadow-md active:scale-95 whitespace-nowrap">
                         Submit Assessment
                     </button>
                 </div>
 
                 <!-- Review Back Bar -->
                 <div id="review-back-bar" class="hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex justify-center">
-                    <a href="/student-exams.html" class="px-8 py-3.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-all shadow-md">← Back to My Exams</a>
+                    <a href="/src/views/student-exams.html" class="px-8 py-3.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-all shadow-md">← Back to My Exams</a>
                 </div>
             </form>
         </div>
     </main>
+
+    <!-- Hidden canvas for snapshots -->
+    <canvas id="snapshot-canvas" style="display:none;"></canvas>
+
+    <!-- MediaPipe Baseline Calibration Overlay -->
+    <div id="mp-calib-overlay" class="hidden fixed inset-0 z-[300] flex items-center justify-center p-4" style="background:rgba(2,6,23,0.82);backdrop-filter:blur(4px);">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl text-center">
+            <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center">
+                <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </div>
+            <h3 class="font-bold text-lg text-slate-900 mb-2">Calibrating Gaze Tracking</h3>
+            <p class="text-sm text-slate-500 mb-4">Look straight ahead and hold still for 3 seconds.</p>
+            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden mb-2">
+                <div id="mp-calib-bar" class="h-full bg-blue-600 rounded-full transition-all duration-300" style="width:0%"></div>
+            </div>
+            <p id="mp-calib-status" class="text-xs text-slate-400">Collecting baseline data...</p>
+        </div>
+    </div>
+
+    <!-- Tracking Toast -->
+    <div id="track-toast" class="text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl" style="background:rgba(120,53,15,0.92);">
+        <span id="track-toast-text">Movement detected</span>
+    </div>
+
+    <!-- Tracking Modal (non-blocking, exam continues) -->
+    <div id="track-modal" class="hidden fixed inset-0 z-[400] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.55);">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
+            <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
+                <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h3 class="font-bold text-lg text-slate-900 mb-2">Proctoring Alert</h3>
+            <p id="track-modal-text" class="text-sm text-slate-600 mb-5">Multiple suspicious behaviors detected.</p>
+            <button onclick="closeTrackModal()" class="w-full py-3 text-white font-bold rounded-xl transition-colors" style="background:#111111;">I Understand — Continue Exam</button>
+        </div>
+    </div>
 
 <script>
 // ═══════════════════════════════════════════
@@ -343,14 +409,21 @@ function hide(id) { if(el(id)) el(id).classList.add('hidden'); }
 function show(id) { if(el(id)) el(id).classList.remove('hidden'); }
 function setText(id, v) { if(el(id)) el(id).innerText = v; }
 
+// ── Named constants ──────────────────────────
+const HEAD_TURN_THRESHOLD    = 20;
+const HEAD_PITCH_THRESHOLD   = 20;
+const GAZE_THRESHOLD         = 0.15;
+const FACE_ABSENT_FRAMES     = 3;
+const CAMERA_DENIED_BLOCKS_EXAM = false;
+
 // Exam data
 let currentExamId = null, userEmail = null, timerInterval = null, examDataObj = null;
 
 // Proctoring state tracking
 let isProctoringActive = false;
 let warningCount = 0;
-let suspiciousFrames = 0; // Tracks if face is completely missing
-let wanderingFrames = 0;  // Tracks if face is present, but eyes are looking off-screen
+let suspiciousFrames = 0;
+let wanderingFrames = 0;
 
 // Face detection
 const FACE_FRAMES_NEEDED = 55;
@@ -365,10 +438,22 @@ const CALIB_POS = [
 ];
 let calibDone = 0;
 
+// Camera PiP + MediaPipe state
+let pipCameraStream = null;
+let mpFaceMesh = null, mpCameraUtil = null;
+let mpLatestLandmarks = null;
+let mpBaseline = null;
+let faceAbsentCount = 0;
+let mpDetectionInterval = null;
+let examStartMs = null;
+const eventCounts = {};
+
 // ═══════════════════════════════════════════
 //  BOOT
 // ═══════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', async () => {
+    if (typeof initNotificationBell !== 'undefined') initNotificationBell();
+
     const p = new URLSearchParams(window.location.search);
     currentExamId = p.get('id');
     const s = typeof SecurityGuard !== 'undefined' ? SecurityGuard.getSession() : null;
@@ -394,14 +479,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener("blur", () => {
         if (isProctoringActive) {
             triggerWarning("Window lost focus! Do not open other applications.");
+            postTrackingEvent('window_blur', {});
         }
     });
 
     document.addEventListener("visibilitychange", () => {
         if (document.hidden && isProctoringActive) {
             triggerWarning("Tab switch detected! You must stay on the exam page.");
+            postTrackingEvent('tab_switch', {});
         }
     });
+
+    document.addEventListener('copy', () => { if (isProctoringActive) postTrackingEvent('copy_attempt', {}); });
+    document.addEventListener('paste', () => { if (isProctoringActive) postTrackingEvent('paste_attempt', {}); });
+    document.addEventListener('contextmenu', (e) => { if (isProctoringActive) { e.preventDefault(); postTrackingEvent('right_click', {}); } });
 
     await loadExamDetails();
 });
@@ -416,10 +507,11 @@ async function loadExamDetails() {
     const { exam, questions, submission, isReadonly, isMissed } = res.data;
     examDataObj = exam;
 
-    if (isMissed) { hide('pre-exam-overlay'); showMissed(exam); return; }
-    if (isReadonly && submission) { hide('pre-exam-overlay'); showReview(exam, questions, submission); return; }
+    if (isMissed) { showMissed(exam); return; }
+    if (isReadonly && submission) { showReview(exam, questions, submission); return; }
 
-    // Active exam logic
+    // Active exam — show the proctoring overlay now that we know it's needed
+    show('pre-exam-overlay');
     setText('pre-exam-title',    exam.title);
     setText('pre-exam-course',   exam.courseName);
     setText('pre-exam-duration', exam.durationMinutes);
@@ -431,7 +523,7 @@ async function loadExamDetails() {
     const key = `aura_exam_start_${currentExamId}_${userEmail}`;
     if (localStorage.getItem(key)) {
         goToStep('face');
-        hide('btn-to-calibration'); // Hide calibration button since we will auto-resume the exam
+        hide('btn-to-calibration');
         startFaceDetection();
     } else {
         goToStep('instructions');
@@ -660,19 +752,28 @@ function updateCalibUI() {
 // ═══════════════════════════════════════════
 //  BEGIN EXAM
 // ═══════════════════════════════════════════
-function beginExam() {
+async function beginExam() {
     hide('pre-exam-overlay');
     show('exam-form');
-    
+
     const pb = el('proctoring-badge');
-    pb.classList.remove('hidden'); 
+    pb.classList.remove('hidden');
     pb.classList.add('flex');
-    
+
     document.body.classList.remove('overflow-hidden');
-    
+
+    // Feature 2: Camera PiP
+    await startPipCamera();
+
+    // Feature 3: MediaPipe baseline calibration
+    await initMediaPipe();
+    await runMpBaseline();
+    examStartMs = Date.now();
+
     // This flips the switch. The WebGazer listener will now actively issue warnings.
-    isProctoringActive = true; 
-    
+    isProctoringActive = true;
+    startMpProctoring();
+
     startTimer();
 }
 
@@ -693,6 +794,9 @@ function triggerWarning(message) {
 
 function stopProctoring() {
     isProctoringActive = false;
+    stopMpProctoring();
+    if (pipCameraStream) { pipCameraStream.getTracks().forEach(t => t.stop()); pipCameraStream = null; }
+    const pip = el('pip-camera'); if (pip) pip.remove();
     try { if (typeof webgazer !== 'undefined') { webgazer.pause(); webgazer.end(); } } catch(e) {}
     const vf = document.getElementById('webgazerVideoFeed');
     if (vf) vf.remove();
@@ -839,6 +943,213 @@ function renderQuestions(questions, submission) {
             </div>
         </div>`;
     }).join('');
+}
+
+// ═══════════════════════════════════════════
+//  TRACKING API
+// ═══════════════════════════════════════════
+async function postTrackingEvent(eventType, metadata = {}) {
+    if (!currentExamId || !userEmail) return;
+    try {
+        const token = localStorage.getItem('aura_token');
+        await fetch('/api/tracking/event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+            body: JSON.stringify({ examId: currentExamId, studentId: userEmail, eventType, metadata })
+        });
+    } catch {}
+}
+
+// ═══════════════════════════════════════════
+//  CAMERA PiP (Feature 2)
+// ═══════════════════════════════════════════
+async function startPipCamera() {
+    if (!examDataObj || !examDataObj.cameraRequired) return;
+    const pip = document.createElement('video');
+    pip.id = 'pip-camera';
+    pip.autoplay = true; pip.muted = true; pip.playsInline = true;
+    document.body.appendChild(pip);
+    try {
+        pipCameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 240 } });
+        pip.srcObject = pipCameraStream;
+        const track = pipCameraStream.getVideoTracks()[0];
+        if (track) track.addEventListener('ended', () => postTrackingEvent('camera_off', {}));
+    } catch (err) {
+        pip.remove();
+        postTrackingEvent('camera_denied', { error: err.name });
+        if (CAMERA_DENIED_BLOCKS_EXAM) showError('Camera access is required for this exam. Please allow camera permissions and reload.');
+    }
+}
+
+// ═══════════════════════════════════════════
+//  SNAPSHOT CAPTURE
+// ═══════════════════════════════════════════
+function captureSnapshot(videoEl) {
+    try {
+        const c = el('snapshot-canvas');
+        c.width = 160; c.height = 120;
+        c.getContext('2d').drawImage(videoEl, 0, 0, 160, 120);
+        return c.toDataURL('image/jpeg', 0.6);
+    } catch { return null; }
+}
+
+// ═══════════════════════════════════════════
+//  TRACKING TOAST & MODAL
+// ═══════════════════════════════════════════
+function showTrackingToast(msg) {
+    el('track-toast-text').innerText = msg;
+    el('track-toast').classList.add('show');
+    setTimeout(() => el('track-toast').classList.remove('show'), 3500);
+}
+
+function showTrackingModal(eventType) {
+    const labels = { head_turn: 'head turning', head_down: 'looking down', gaze_away: 'gaze away from screen', face_absent: 'face not visible' };
+    el('track-modal-text').innerText = `You have triggered "${labels[eventType] || eventType}" 5 times. Please keep your attention on the exam. The exam will continue.`;
+    el('track-modal').classList.remove('hidden');
+}
+
+function closeTrackModal() { el('track-modal').classList.add('hidden'); }
+
+// ═══════════════════════════════════════════
+//  HEAD POSE CALCULATION (6-point method)
+// ═══════════════════════════════════════════
+function computeHeadPose(lm) {
+    const nose = lm[1], leftEye = lm[33], rightEye = lm[263];
+    const chin = lm[199];
+    const eyeMidX = (leftEye.x + rightEye.x) / 2;
+    const eyeMidY = (leftEye.y + rightEye.y) / 2;
+    const yaw   = (nose.x - eyeMidX) * 300;
+    const chinEyeSpan = chin.y - eyeMidY;
+    const pitch = (nose.y - eyeMidY - chinEyeSpan * 0.4) * 400;
+    const liris = lm[468], riris = lm[473];
+    const irisX = (liris && riris) ? (liris.x + riris.x) / 2 : 0.5;
+    const irisY = (liris && riris) ? (liris.y + riris.y) / 2 : 0.5;
+    return { yaw, pitch, irisX, irisY };
+}
+
+// ═══════════════════════════════════════════
+//  MEDIAPIPE INIT
+// ═══════════════════════════════════════════
+async function initMediaPipe() {
+    if (typeof FaceMesh === 'undefined') return;
+    mpFaceMesh = new FaceMesh({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}` });
+    mpFaceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+    mpFaceMesh.onResults((results) => {
+        mpLatestLandmarks = (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) ? results.multiFaceLandmarks[0] : null;
+    });
+    try { await mpFaceMesh.initialize(); } catch {}
+}
+
+// ═══════════════════════════════════════════
+//  MEDIAPIPE BASELINE CALIBRATION
+// ═══════════════════════════════════════════
+async function runMpBaseline() {
+    if (!mpFaceMesh) return;
+    show('mp-calib-overlay');
+    el('mp-calib-bar').style.width = '0%';
+    el('mp-calib-status').innerText = 'Initializing camera...';
+
+    const vid = document.createElement('video');
+    vid.id = 'mp-video-source';
+    vid.autoplay = true; vid.muted = true; vid.playsInline = true;
+    vid.style.cssText = 'position:fixed;opacity:0;pointer-events:none;width:1px;height:1px;';
+    document.body.appendChild(vid);
+
+    let mpStream = null;
+    try {
+        mpStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 240 } });
+        vid.srcObject = mpStream;
+        await vid.play().catch(() => {});
+    } catch {
+        hide('mp-calib-overlay'); vid.remove(); return;
+    }
+
+    if (typeof Camera !== 'undefined') {
+        mpCameraUtil = new Camera(vid, {
+            onFrame: async () => { if (mpFaceMesh) await mpFaceMesh.send({ image: vid }); },
+            width: 320, height: 240
+        });
+        try { await mpCameraUtil.start(); } catch {}
+    }
+
+    const samples = [];
+    const TOTAL = 3000, STEP = 500;
+    let elapsed = 0;
+
+    await new Promise((resolve) => {
+        const tick = setInterval(() => {
+            elapsed += STEP;
+            if (mpLatestLandmarks) {
+                samples.push(computeHeadPose(mpLatestLandmarks));
+                const pct = Math.min((samples.length / (TOTAL / STEP)) * 100, 100);
+                el('mp-calib-bar').style.width = `${pct}%`;
+                el('mp-calib-status').innerText = `Calibrating... ${samples.length}/${TOTAL / STEP}`;
+            } else {
+                el('mp-calib-status').innerText = 'No face detected — please face the camera';
+                if (elapsed > 1000 && samples.length === 0) { elapsed = 0; }
+            }
+            if (elapsed >= TOTAL && samples.length >= 3) { clearInterval(tick); resolve(); }
+            if (elapsed >= 10000) { clearInterval(tick); resolve(); }
+        }, STEP);
+    });
+
+    if (samples.length > 0) {
+        const avg = (key) => samples.reduce((s, x) => s + x[key], 0) / samples.length;
+        mpBaseline = { yaw: avg('yaw'), pitch: avg('pitch'), irisX: avg('irisX'), irisY: avg('irisY') };
+    }
+
+    hide('mp-calib-overlay');
+}
+
+// ═══════════════════════════════════════════
+//  MEDIAPIPE LIVE DETECTION
+// ═══════════════════════════════════════════
+function startMpProctoring() {
+    if (!mpFaceMesh) return;
+    const vid = el('mp-video-source');
+    mpDetectionInterval = setInterval(() => {
+        if (!isProctoringActive || !mpBaseline) return;
+        if (!mpLatestLandmarks) {
+            faceAbsentCount++;
+            if (faceAbsentCount >= FACE_ABSENT_FRAMES) {
+                faceAbsentCount = 0;
+                const snap = vid ? captureSnapshot(vid) : null;
+                fireTrackingEvent('face_absent', { snapshotUrl: snap });
+            }
+            return;
+        }
+        faceAbsentCount = 0;
+        const pose = computeHeadPose(mpLatestLandmarks);
+        const dYaw   = pose.yaw   - mpBaseline.yaw;
+        const dPitch = pose.pitch - mpBaseline.pitch;
+        const dIrisX = Math.abs(pose.irisX - mpBaseline.irisX);
+        const dIrisY = Math.abs(pose.irisY - mpBaseline.irisY);
+        const snap = vid ? captureSnapshot(vid) : null;
+
+        if (Math.abs(dYaw) > HEAD_TURN_THRESHOLD) {
+            fireTrackingEvent('head_turn', { yaw: pose.yaw, baselineYaw: mpBaseline.yaw, delta: dYaw, snapshotUrl: snap });
+        } else if (dPitch > HEAD_PITCH_THRESHOLD) {
+            fireTrackingEvent('head_down', { pitch: pose.pitch, baselinePitch: mpBaseline.pitch, delta: dPitch, snapshotUrl: snap });
+        } else if (dIrisX > GAZE_THRESHOLD || dIrisY > GAZE_THRESHOLD) {
+            fireTrackingEvent('gaze_away', { irisX: pose.irisX, irisY: pose.irisY, snapshotUrl: snap });
+        }
+    }, 500);
+}
+
+function fireTrackingEvent(type, metadata) {
+    postTrackingEvent(type, { ...metadata, examStartMs });
+    eventCounts[type] = (eventCounts[type] || 0) + 1;
+    const labels = { head_turn: 'Head turned', head_down: 'Looking down', gaze_away: 'Gaze away', face_absent: 'Face not detected' };
+    showTrackingToast(labels[type] || type);
+    if (eventCounts[type] === 5) showTrackingModal(type);
+}
+
+function stopMpProctoring() {
+    if (mpDetectionInterval) { clearInterval(mpDetectionInterval); mpDetectionInterval = null; }
+    try { if (mpCameraUtil) { mpCameraUtil.stop(); mpCameraUtil = null; } } catch {}
+    try { if (mpFaceMesh) { mpFaceMesh.close(); mpFaceMesh = null; } } catch {}
+    const v = el('mp-video-source');
+    if (v) { try { v.srcObject && v.srcObject.getTracks().forEach(t => t.stop()); } catch {} v.remove(); }
 }
 
 // ═══════════════════════════════════════════

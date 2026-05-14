@@ -4,88 +4,278 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraExam - Portal Access</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','system-ui','sans-serif'],serif:['Cormorant Garamond','Georgia','serif']}}}}</script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        .fade-enter { opacity: 0; transform: translateY(10px); }
-        .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 300ms, transform 300ms; }
+        :root {
+            --bg: #F8F7F4;
+            --surface: #FFFFFF;
+            --text: #111111;
+            --text-secondary: #525252;
+            --text-muted: #8A8A8A;
+            --accent: #1D3461;
+            --border: #E5E1DA;
+            --dark: #111111;
+        }
+        body { background: var(--bg); }
+
+        .auth-input {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 200ms ease, box-shadow 200ms ease;
+        }
+        .auth-input::placeholder { color: var(--text-muted); }
+        .auth-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(29,52,97,0.08);
+        }
+        select.auth-input option { background: #fff; color: #111; }
+
+        .btn-primary {
+            background: var(--dark);
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            width: 100%;
+            font-family: inherit;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border: none;
+            transition: background 200ms ease;
+        }
+        .btn-primary:hover { background: var(--accent); }
+
+        .divider-line { flex: 1; height: 1px; background: var(--border); }
+
+        .tab-active {
+            color: var(--text);
+            border-bottom: 2px solid var(--text);
+            font-weight: 600;
+            background: transparent;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+        .tab-inactive {
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+            background: transparent;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+        .tab-inactive:hover { color: var(--text-secondary); }
+
+        .role-btn {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.875rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            background: var(--surface);
+            cursor: pointer;
+            transition: border-color 200ms ease, background 200ms ease;
+            text-align: left;
+        }
+        .role-btn:hover { border-color: var(--accent); background: #F0F2F7; }
+
+        .back-btn {
+            background: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+            padding: 0;
+            color: var(--text-muted);
+            transition: color 200ms ease;
+        }
+        .back-btn:hover { color: var(--text); }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex font-sans">
 
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden relative" id="app-container">
-        <div class="bg-blue-700 p-6 text-center">
-            <h1 class="text-2xl font-bold text-white tracking-wide">AuraExam</h1>
-            <p class="text-blue-100 text-sm mt-1">Secure Assessment Portal</p>
+    <!-- Left Brand Panel -->
+    <div class="hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between p-12 xl:p-16 flex-shrink-0" style="background:#111111;">
+        <div>
+            <div class="mb-16">
+                <img src="/src/assets/logo.png" alt="AuraExam" class="h-10 w-auto">
+            </div>
+
+            <div class="max-w-xs">
+                <h1 class="font-serif font-light leading-tight mb-6" style="color:#F8F7F4;font-size:3rem;letter-spacing:-0.01em;line-height:1.1;">Assessment<br><em>Redefined.</em></h1>
+                <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,0.4);">A secure, intelligent exam platform for modern educators and their students.</p>
+            </div>
         </div>
 
-        <div class="p-8">
+        <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:1.5rem;">
+            <p class="text-xs tracking-widest uppercase" style="color:rgba(255,255,255,0.2);">Secure Assessment Portal</p>
+        </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="flex-1 flex items-center justify-center p-8 lg:p-12 xl:p-16 overflow-y-auto" style="background:#F8F7F4;">
+        <div class="w-full max-w-sm" id="app-container">
+
+            <!-- Mobile Brand -->
+            <div class="lg:hidden mb-8">
+                <img src="/src/assets/logo.png" alt="AuraExam" class="h-9 w-auto">
+            </div>
+
+            <!-- Heading -->
+            <div class="mb-7">
+                <h2 class="text-2xl font-bold" style="color:#111111;">Portal Access</h2>
+                <p class="text-sm mt-1" style="color:#8A8A8A;">Sign in to continue to your assessment space.</p>
+            </div>
+
             <!-- Tabs -->
-            <div class="flex mb-6 bg-slate-100 p-1 rounded-lg">
-                <button id="tab-login" class="flex-1 py-2 text-sm font-medium rounded-md bg-white shadow-sm text-blue-700 transition-all">Login</button>
-                <button id="tab-register" class="flex-1 py-2 text-sm font-medium rounded-md text-slate-500 hover:text-slate-700 transition-all">Register</button>
+            <div class="flex mb-6" style="border-bottom:1px solid #E5E1DA;">
+                <button id="tab-login" class="tab-active flex-1 pb-3 text-sm text-center cursor-pointer">Sign In</button>
+                <button id="tab-register" class="tab-inactive flex-1 pb-3 text-sm text-center cursor-pointer">Register</button>
             </div>
 
             <!-- Message Box -->
-            <div id="message-box" class="hidden mb-4 p-3 rounded-lg text-sm text-center font-medium"></div>
+            <div id="message-box" class="hidden mb-4 p-3 text-sm text-center font-medium" style="border-radius:4px;"></div>
 
-            <!-- LOGIN FORM (Automatic RBAC) -->
-            <form id="form-login" class="space-y-4 fade-enter-active">
+            <!-- LOGIN FORM -->
+            <form id="form-login" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1" for="login-email">Email Address</label>
-                    <input type="email" id="login-email" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder="user@university.edu">
+                    <label class="block text-xs font-semibold uppercase tracking-widest mb-1.5" style="color:#8A8A8A;" for="login-email">Email Address</label>
+                    <input type="email" id="login-email" required class="auth-input" placeholder="you@university.edu">
                 </div>
                 <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-sm font-medium text-slate-700" for="login-password">Password</label>
-                        <a href="#" class="text-xs text-blue-600 hover:underline">Forgot Password?</a>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-xs font-semibold uppercase tracking-widest" style="color:#8A8A8A;" for="login-password">Password</label>
+                        <a href="#" onclick="showPanel('forgot'); return false;" class="text-xs transition-colors cursor-pointer" style="color:#525252;" onmouseover="this.style.color='#111111'" onmouseout="this.style.color='#525252'">Forgot?</a>
                     </div>
-                    <input type="password" id="login-password" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder="••••••••">
+                    <input type="password" id="login-password" required class="auth-input" placeholder="••••••••">
                 </div>
-                <button type="submit" class="w-full bg-blue-700 text-white font-medium py-2.5 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 transition-all mt-4">
-                    Secure Login
-                </button>
+                <button type="submit" class="btn-primary mt-2">Sign In Securely</button>
+                <div class="flex items-center gap-3 my-2">
+                    <div class="divider-line"></div>
+                    <span class="text-xs" style="color:#8A8A8A;">or</span>
+                    <div class="divider-line"></div>
+                </div>
+                <div id="google-btn-login" class="flex justify-center"></div>
             </form>
 
-            <!-- REGISTER FORM (Roles still needed for creation) -->
+            <!-- REGISTER FORM -->
             <form id="form-register" class="hidden space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1" for="reg-role">Register As</label>
-                    <select id="reg-role" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white text-slate-700">
+                    <label class="block text-xs font-semibold uppercase tracking-widest mb-1.5" style="color:#8A8A8A;" for="reg-role">Register As</label>
+                    <select id="reg-role" required class="auth-input">
                         <option value="" disabled selected>Select your role</option>
                         <option value="student">Student</option>
                         <option value="lecturer">Teacher / Lecturer</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1" for="reg-name">Full Name</label>
-                    <input type="text" id="reg-name" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder="John Doe">
+                    <label class="block text-xs font-semibold uppercase tracking-widest mb-1.5" style="color:#8A8A8A;" for="reg-name">Full Name</label>
+                    <input type="text" id="reg-name" required class="auth-input" placeholder="John Doe">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1" for="reg-email">Email Address</label>
-                    <input type="email" id="reg-email" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder="user@university.edu">
+                    <label class="block text-xs font-semibold uppercase tracking-widest mb-1.5" style="color:#8A8A8A;" for="reg-email">Email Address</label>
+                    <input type="email" id="reg-email" required class="auth-input" placeholder="you@university.edu">
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1" for="reg-password">Password</label>
-                        <input type="password" id="reg-password" required minlength="8" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder="••••••••">
+                        <label class="block text-xs font-semibold uppercase tracking-widest mb-1.5" style="color:#8A8A8A;" for="reg-password">Password</label>
+                        <input type="password" id="reg-password" required minlength="8" class="auth-input" placeholder="••••••••">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1" for="reg-confirm">Confirm</label>
-                        <input type="password" id="reg-confirm" required minlength="8" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder="••••••••">
+                        <label class="block text-xs font-semibold uppercase tracking-widest mb-1.5" style="color:#8A8A8A;" for="reg-confirm">Confirm</label>
+                        <input type="password" id="reg-confirm" required minlength="8" class="auth-input" placeholder="••••••••">
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-slate-800 text-white font-medium py-2.5 rounded-lg hover:bg-slate-900 focus:ring-4 focus:ring-slate-300 transition-all mt-4">
-                    Create Account
-                </button>
+                <button type="submit" class="btn-primary mt-2">Create Account</button>
+                <div class="flex items-center gap-3 my-2">
+                    <div class="divider-line"></div>
+                    <span class="text-xs" style="color:#8A8A8A;">or</span>
+                    <div class="divider-line"></div>
+                </div>
+                <div id="google-btn-register" class="flex justify-center"></div>
             </form>
-        </div>
 
-        <!-- Redirect Overlay -->
-        <div id="redirect-overlay" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-20">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mb-4"></div>
-            <h2 id="redirect-text" class="text-xl font-bold text-slate-800">Verifying Identity...</h2>
-            <p id="redirect-url" class="text-sm text-slate-500 mt-2 font-mono"></p>
+            <!-- GOOGLE ROLE PICKER -->
+            <div id="panel-google-role" class="hidden space-y-4">
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold" style="color:#111111;">One last step</h3>
+                    <p class="text-sm mt-1" style="color:#8A8A8A;">How will you use AuraExam?</p>
+                </div>
+                <button onclick="submitGoogleRole('student')" class="role-btn">
+                    <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0" style="background:#EEF0F6;">
+                        <svg class="w-4 h-4" style="color:#1D3461;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold" style="color:#111111;">I'm a Student</p>
+                        <p class="text-xs mt-0.5" style="color:#8A8A8A;">Take exams assigned by my lecturer</p>
+                    </div>
+                </button>
+                <button onclick="submitGoogleRole('lecturer')" class="role-btn">
+                    <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0" style="background:#EEF0F6;">
+                        <svg class="w-4 h-4" style="color:#1D3461;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold" style="color:#111111;">I'm a Lecturer</p>
+                        <p class="text-xs mt-0.5" style="color:#8A8A8A;">Create and manage exams for students</p>
+                    </div>
+                </button>
+                <button onclick="showPanel('login')" class="back-btn">← Back to login</button>
+            </div>
+
+            <!-- FORGOT PASSWORD PANEL -->
+            <div id="panel-forgot" class="hidden space-y-4">
+                <button onclick="showPanel('login')" class="back-btn mb-2">
+                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Back to Login
+                </button>
+                <div>
+                    <h3 class="text-base font-bold" style="color:#111111;">Reset Password</h3>
+                    <p class="text-sm mt-1" style="color:#8A8A8A;">Enter your email to receive a reset code.</p>
+                </div>
+                <input type="email" id="forgot-email" placeholder="your@email.com" class="auth-input">
+                <button onclick="handleForgot()" class="btn-primary">Send Reset Code</button>
+                <div id="forgot-result" class="hidden p-3 text-sm" style="border-radius:4px;"></div>
+            </div>
+
+            <!-- RESET PASSWORD PANEL -->
+            <div id="panel-reset" class="hidden space-y-4">
+                <button onclick="showPanel('forgot')" class="back-btn mb-2">
+                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Back
+                </button>
+                <div>
+                    <h3 class="text-base font-bold" style="color:#111111;">New Password</h3>
+                    <p class="text-sm mt-1" style="color:#8A8A8A;">Enter the code and your new password.</p>
+                </div>
+                <input type="text" id="reset-code" maxlength="6" placeholder="6-digit code" class="auth-input tracking-widest">
+                <input type="password" id="reset-pw" minlength="8" placeholder="New password (8+ chars)" class="auth-input">
+                <button onclick="handleReset()" class="btn-primary">Reset Password</button>
+                <div id="reset-result" class="hidden p-3 text-sm" style="border-radius:4px;"></div>
+            </div>
+
         </div>
+    </div>
+
+    <!-- Redirect Overlay -->
+    <div id="redirect-overlay" class="hidden fixed inset-0 flex flex-col items-center justify-center z-50" style="background:rgba(248,247,244,0.96);">
+        <div class="w-10 h-10 rounded-full border-2 animate-spin mb-5" style="border-color:#E5E1DA;border-top-color:#111111;"></div>
+        <h2 id="redirect-text" class="text-xl font-bold" style="color:#111111;">Verifying Identity...</h2>
+        <p id="redirect-url" class="text-sm mt-2 font-mono" style="color:#8A8A8A;"></p>
     </div>
 
     <!-- Scripts -->
@@ -93,7 +283,134 @@
     <script src="../views/auth.view.js"></script>
     <script src="../controllers/auth.controller.js"></script>
     <script>
+        const GOOGLE_CLIENT_ID = '721223365041-ugchkib8v60acclrgur9pqvg7ad4deb1.apps.googleusercontent.com';
+        let _pendingGoogleCredential = null;
+        let forgotEmail = '';
+
+        window.addEventListener('load', () => {
+            if (!window.google) return;
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleGoogleCredential,
+                auto_select: false,
+                cancel_on_tap_outside: true
+            });
+            renderGoogleButtons();
+        });
+
+        function renderGoogleButtons() {
+            const cfg = { theme: 'outline', size: 'large', width: 340, logo_alignment: 'center' };
+            const loginEl    = document.getElementById('google-btn-login');
+            const registerEl = document.getElementById('google-btn-register');
+            if (loginEl)    google.accounts.id.renderButton(loginEl,    cfg);
+            if (registerEl) google.accounts.id.renderButton(registerEl, { ...cfg, text: 'signup_with' });
+        }
+
+        async function handleGoogleCredential(response) {
+            const credential = response.credential;
+            const msgBox = document.getElementById('message-box');
+            msgBox.className = 'mb-4 p-3 text-sm text-center font-medium';
+            msgBox.style.cssText = 'border-radius:4px;background:#EEF0F6;color:#1D3461;border:1px solid #E5E1DA;';
+            msgBox.textContent = 'Verifying with Google...';
+            msgBox.classList.remove('hidden');
+
+            const res = await AuthService.googleAuth(credential);
+            if (res.success) {
+                localStorage.setItem('aura_user_session', JSON.stringify({ role: res.role, email: res.email || '', name: res.name }));
+                AuthView.showRedirectOverlay(res.role.toUpperCase(), res.redirectUrl);
+                setTimeout(() => window.location.href = res.redirectUrl, 1800);
+            } else if (res.needsRole) {
+                _pendingGoogleCredential = credential;
+                msgBox.classList.add('hidden');
+                showPanel('google-role');
+            } else {
+                msgBox.className = 'mb-4 p-3 text-sm text-center font-medium';
+                msgBox.style.cssText = 'border-radius:4px;background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;';
+                msgBox.textContent = res.message || 'Google sign-in failed.';
+            }
+        }
+
+        async function submitGoogleRole(role) {
+            if (!_pendingGoogleCredential) return;
+            const msgBox = document.getElementById('message-box');
+            msgBox.className = 'mb-4 p-3 text-sm text-center font-medium';
+            msgBox.style.cssText = 'border-radius:4px;background:#EEF0F6;color:#1D3461;border:1px solid #E5E1DA;';
+            msgBox.textContent = 'Creating your account...';
+            msgBox.classList.remove('hidden');
+
+            const res = await AuthService.googleAuth(_pendingGoogleCredential, role);
+            _pendingGoogleCredential = null;
+            if (res.success) {
+                localStorage.setItem('aura_user_session', JSON.stringify({ role: res.role, email: res.email || '', name: res.name }));
+                AuthView.showRedirectOverlay(res.role.toUpperCase(), res.redirectUrl);
+                setTimeout(() => window.location.href = res.redirectUrl, 1800);
+            } else {
+                showPanel('login');
+                msgBox.className = 'mb-4 p-3 text-sm text-center font-medium';
+                msgBox.style.cssText = 'border-radius:4px;background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;';
+                msgBox.textContent = res.message || 'Account creation failed.';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => { AuthController.init(); });
+
+        function showPanel(panel) {
+            ['form-login','form-register','panel-forgot','panel-reset','panel-google-role'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            const map = { login: 'form-login', register: 'form-register', 'google-role': 'panel-google-role' };
+            const target = map[panel] || `panel-${panel}`;
+            const el = document.getElementById(target);
+            if (el) el.classList.remove('hidden');
+        }
+
+        async function handleForgot() {
+            const email = document.getElementById('forgot-email').value.trim();
+            const resultEl = document.getElementById('forgot-result');
+            if (!email) return;
+            const res = await fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            }).then(r => r.json());
+            resultEl.classList.remove('hidden');
+            if (res.success && res.resetCode) {
+                forgotEmail = email;
+                resultEl.style.cssText = 'background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;padding:0.75rem;border-radius:4px;';
+                resultEl.innerHTML = `<strong>Demo mode:</strong> Your reset code is <span style="font-family:monospace;font-weight:800;font-size:1.1rem;letter-spacing:0.2em;">${res.resetCode}</span><br><span style="font-size:0.75rem;opacity:0.8;">Copy it and click below to set a new password.</span>`;
+                setTimeout(() => showPanel('reset'), 2500);
+            } else {
+                resultEl.style.cssText = 'background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;padding:0.75rem;border-radius:4px;';
+                resultEl.innerText = res.message;
+            }
+        }
+
+        async function handleReset() {
+            const code = document.getElementById('reset-code').value.trim();
+            const newPassword = document.getElementById('reset-pw').value;
+            const resultEl = document.getElementById('reset-result');
+            if (!code || !newPassword || newPassword.length < 8) {
+                resultEl.style.cssText = 'background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;padding:0.75rem;border-radius:4px;';
+                resultEl.innerText = 'Please fill in all fields (password must be 8+ characters).';
+                resultEl.classList.remove('hidden');
+                return;
+            }
+            const res = await fetch('/api/auth/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: forgotEmail, code, newPassword })
+            }).then(r => r.json());
+            resultEl.classList.remove('hidden');
+            if (res.success) {
+                resultEl.style.cssText = 'background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;padding:0.75rem;border-radius:4px;';
+                resultEl.innerText = res.message;
+                setTimeout(() => showPanel('login'), 2500);
+            } else {
+                resultEl.style.cssText = 'background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;padding:0.75rem;border-radius:4px;';
+                resultEl.innerText = res.message;
+            }
+        }
     </script>
 </body>
 </html>

@@ -1,67 +1,71 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraExam - Question Bank</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','system-ui','sans-serif']}}}}</script>
     <script src="/src/utils/security.js"></script>
     <script>
         if (typeof SecurityGuard !== 'undefined') SecurityGuard.protectPage('lecturer');
     </script>
 </head>
-<body class="bg-slate-50 flex h-screen overflow-hidden font-sans text-slate-800">
+<body class="flex h-screen overflow-hidden font-sans" style="background:#F8F7F4;color:#111111;">
 
     <!-- Sidebar -->
-    <aside class="w-64 bg-indigo-900 text-indigo-100 flex flex-col hidden md:flex transition-all duration-300">
-        <div class="h-16 flex items-center px-6 bg-indigo-950/40 border-b border-indigo-800">
-            <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mr-3 shadow-sm">
-                <svg class="w-5 h-5 text-indigo-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1h2a1 1 0 011-1v5m-4 0h4"></path></svg>
-            </div>
-            <span class="font-bold text-xl text-white tracking-tight">AuraExam</span>
+    <aside class="w-64 flex flex-col hidden md:flex flex-shrink-0" style="background:#111111;">
+        <div class="h-16 flex items-center px-4" style="border-bottom:1px solid rgba(255,255,255,0.07);">
+            <img src="/src/assets/logo.png" alt="AuraExam" class="h-8 w-auto">
         </div>
 
-        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
-            <a href="/lecturer-dashboard.html" class="flex items-center px-3 py-2.5 text-sm font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white transition-colors">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
+            <a href="/src/views/lecturer-dashboard.html" class="flex items-center px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 Dashboard Overview
             </a>
             <div>
-                <button onclick="toggleSubmenu('menu-classes')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white transition-colors">
+                <button onclick="toggleSubmenu('menu-classes')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);background:transparent;border:none;cursor:pointer;" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         Class Management
                     </div>
                     <svg id="menu-classes-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                <div id="menu-classes" class="hidden mt-1 space-y-1 pl-11 pr-2">
-                    <a href="/lecturer-classes.html" class="block px-3 py-2 text-xs font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white">Active Classes</a>
+                <div id="menu-classes" class="hidden mt-0.5 space-y-0.5 pl-10 pr-2">
+                    <a href="/src/views/lecturer-classes.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">Active Classes</a>
                 </div>
             </div>
             <div>
-                <button onclick="toggleSubmenu('menu-exams')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-white bg-indigo-800 rounded-lg transition-colors shadow-sm">
+                <button onclick="toggleSubmenu('menu-exams')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:#fff;background:rgba(255,255,255,0.1);border:none;cursor:pointer;">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Assessments
                     </div>
                     <svg id="menu-exams-icon" class="w-4 h-4 transition-transform duration-200 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                <div id="menu-exams" class="mt-1 space-y-1 pl-11 pr-2">
-                    <a href="/lecturer-schedule-exam.html" class="block px-3 py-2 text-xs font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white">+ Schedule Exam</a>
-                    <a href="/lecturer-exams.html" class="block px-3 py-2 text-xs font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white">Manage Exams</a>
-                    <a href="/lecturer-questions.html" class="block px-3 py-2 text-xs font-medium text-white bg-indigo-700/50 rounded-lg">Question Bank</a>
+                <div id="menu-exams" class="mt-0.5 space-y-0.5 pl-10 pr-2">
+                    <a href="/src/views/lecturer-schedule-exam.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">+ Schedule Exam</a>
+                    <a href="/src/views/lecturer-exams.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">Manage Exams</a>
+                    <a href="/src/views/lecturer-questions.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="background:rgba(255,255,255,0.08);color:#fff;">Question Bank</a>
                 </div>
             </div>
 
-            <a href="/lecturer-analytics.html" class="flex items-center px-3 py-2.5 text-sm font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white transition-colors group">
-    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-    Analytics & Reports
-</a>
+            <a href="/src/views/lecturer-analytics.html" class="flex items-center px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Analytics & Reports
+            </a>
+            <a href="/src/views/lecturer-notes.html" class="flex items-center px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                My Notes
+            </a>
         </nav>
 
-        <div class="p-4 border-t border-indigo-800">
-            <button onclick="if (typeof SecurityGuard !== 'undefined') SecurityGuard.logout()" class="flex items-center w-full px-3 py-2.5 text-sm font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white transition-colors">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        <div class="p-3" style="border-top:1px solid rgba(255,255,255,0.07);">
+            <button onclick="if (typeof SecurityGuard !== 'undefined') SecurityGuard.logout()" class="flex items-center w-full px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);background:transparent;border:none;cursor:pointer;" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fca5a5'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 Sign Out
             </button>
         </div>
@@ -69,31 +73,31 @@
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 z-10">
-            <h2 class="text-lg font-bold text-slate-800">Question Bank</h2>
+        <header class="h-16 flex items-center justify-between px-8 flex-shrink-0" style="background:#fff;border-bottom:1px solid #E5E1DA;">
+            <h2 class="text-sm font-bold uppercase tracking-widest" style="color:#8A8A8A;">Question Bank</h2>
             <div class="flex items-center gap-4">
-                <p id="lecturer-name" class="text-sm font-bold text-slate-800">Loading...</p>
-                <img id="lecturer-avatar" class="w-8 h-8 rounded-full border-2 border-indigo-100" src="" alt="Avatar">
+                <p id="lecturer-name" class="text-sm font-bold" style="color:#111111;">Loading...</p>
+                <img id="lecturer-avatar" class="w-8 h-8 rounded-full border-2" style="border-color:#E5E1DA;" src="" alt="Avatar">
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-8 bg-slate-50">
+        <main class="flex-1 overflow-y-auto p-8">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900 leading-tight">Your Question Repository</h1>
-                    <p class="text-slate-500 text-sm mt-1">Manage and organize questions to easily assign them to future exams.</p>
+                    <h1 class="text-2xl font-bold leading-tight" style="color:#111111;">Your Question Repository</h1>
+                    <p class="text-sm mt-1" style="color:#8A8A8A;">Manage and organize questions to easily assign them to future exams.</p>
                 </div>
-                <button onclick="openModal()" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-all shadow-md flex items-center gap-2">
+                <button onclick="openModal()" class="px-5 py-2.5 text-white rounded text-sm font-bold transition-all flex items-center gap-2" style="background:#1D3461;">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Add Question
                 </button>
             </div>
 
             <!-- Questions Table -->
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-white rounded overflow-hidden" style="border:1px solid #E5E1DA;">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold tracking-widest border-b border-slate-200">
+                        <thead class="text-xs font-bold uppercase tracking-widest" style="background:#F8F7F4;color:#8A8A8A;border-bottom:1px solid #E5E1DA;">
                             <tr>
                                 <th class="px-6 py-4">Question Prompt</th>
                                 <th class="px-6 py-4">Type</th>
@@ -101,8 +105,8 @@
                                 <th class="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="question-table-body" class="divide-y divide-slate-100">
-                            <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400">Loading your questions...</td></tr>
+                        <tbody id="question-table-body" class="divide-y" style="border-color:#E5E1DA;">
+                            <tr><td colspan="4" class="px-6 py-12 text-center" style="color:#8A8A8A;">Loading your questions...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -111,32 +115,32 @@
     </div>
 
     <!-- MODAL: ADD/EDIT QUESTION -->
-    <div id="modal-question" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8">
-            <div class="bg-indigo-600 p-5 text-white flex justify-between items-center">
+    <div id="modal-question" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto" style="background:rgba(17,17,17,0.5);">
+        <div class="bg-white rounded w-full max-w-2xl overflow-hidden my-8" style="border:1px solid #E5E1DA;">
+            <div class="p-5 text-white flex justify-between items-center" style="background:#1D3461;">
                 <h3 id="modal-title" class="font-bold text-lg">Add New Question</h3>
                 <button onclick="closeModal()" class="text-white hover:opacity-70 transition-opacity">&times;</button>
             </div>
             <form id="form-question" class="p-6 space-y-5">
                 <input type="hidden" id="input-q-id">
-                
+
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Question Prompt</label>
-                    <textarea id="input-q-prompt" required class="w-full px-4 py-3 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors" rows="3" placeholder="Enter your question here..."></textarea>
+                    <label class="block text-xs font-bold uppercase mb-1" style="color:#8A8A8A;">Question Prompt</label>
+                    <textarea id="input-q-prompt" required class="w-full px-4 py-3 rounded outline-none transition-colors" style="border:1px solid #E5E1DA;background:#F8F7F4;color:#111111;" rows="3" placeholder="Enter your question here..."></textarea>
                 </div>
-                
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Question Type</label>
-                        <select id="input-q-type" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                        <label class="block text-xs font-bold uppercase mb-1" style="color:#8A8A8A;">Question Type</label>
+                        <select id="input-q-type" required class="w-full px-4 py-2.5 rounded outline-none" style="border:1px solid #E5E1DA;background:#F8F7F4;color:#111111;">
                             <option value="mcq">Multiple Choice</option>
                             <option value="true_false">True / False</option>
                             <option value="essay">Essay / Short Answer</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Difficulty</label>
-                        <select id="input-q-diff" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                        <label class="block text-xs font-bold uppercase mb-1" style="color:#8A8A8A;">Difficulty</label>
+                        <select id="input-q-diff" required class="w-full px-4 py-2.5 rounded outline-none" style="border:1px solid #E5E1DA;background:#F8F7F4;color:#111111;">
                             <option value="easy">Easy</option>
                             <option value="medium">Medium</option>
                             <option value="hard">Hard</option>
@@ -145,27 +149,27 @@
                 </div>
 
                 <!-- DYNAMIC MCQ OPTIONS -->
-                <div id="mcq-options-container" class="grid grid-cols-2 gap-4 bg-indigo-50/50 p-4 rounded-lg border border-indigo-100">
-                    <div class="col-span-2"><p class="text-xs font-bold text-indigo-800 uppercase">Multiple Choice Options</p></div>
-                    <div><input type="text" id="opt-1" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm" placeholder="Option 1"></div>
-                    <div><input type="text" id="opt-2" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm" placeholder="Option 2"></div>
-                    <div><input type="text" id="opt-3" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm" placeholder="Option 3"></div>
-                    <div><input type="text" id="opt-4" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm" placeholder="Option 4"></div>
+                <div id="mcq-options-container" class="grid grid-cols-2 gap-4 p-4 rounded" style="background:#F8F7F4;border:1px solid #E5E1DA;">
+                    <div class="col-span-2"><p class="text-xs font-bold uppercase" style="color:#1D3461;">Multiple Choice Options</p></div>
+                    <div><input type="text" id="opt-1" class="w-full px-3 py-2 rounded outline-none text-sm" style="border:1px solid #E5E1DA;color:#111111;" placeholder="Option 1"></div>
+                    <div><input type="text" id="opt-2" class="w-full px-3 py-2 rounded outline-none text-sm" style="border:1px solid #E5E1DA;color:#111111;" placeholder="Option 2"></div>
+                    <div><input type="text" id="opt-3" class="w-full px-3 py-2 rounded outline-none text-sm" style="border:1px solid #E5E1DA;color:#111111;" placeholder="Option 3"></div>
+                    <div><input type="text" id="opt-4" class="w-full px-3 py-2 rounded outline-none text-sm" style="border:1px solid #E5E1DA;color:#111111;" placeholder="Option 4"></div>
                 </div>
 
                 <!-- DYNAMIC ANSWER SECTION -->
-                <div id="answer-section-container" class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Correct Answer</label>
-                    
-                    <input type="text" id="input-q-answer-text" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 bg-white hidden" placeholder="Type the exact correct short answer/keyword">
-                    
-                    <select id="input-q-answer-tf" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 bg-white hidden">
+                <div id="answer-section-container" class="p-4 rounded" style="background:#F8F7F4;border:1px solid #E5E1DA;">
+                    <label class="block text-xs font-bold uppercase mb-2" style="color:#8A8A8A;">Correct Answer</label>
+
+                    <input type="text" id="input-q-answer-text" class="w-full px-4 py-2.5 rounded outline-none bg-white hidden" style="border:1px solid #E5E1DA;color:#111111;" placeholder="Type the exact correct short answer/keyword">
+
+                    <select id="input-q-answer-tf" class="w-full px-4 py-2.5 rounded outline-none bg-white hidden" style="border:1px solid #E5E1DA;color:#111111;">
                         <option value="" disabled selected>Select Correct Answer...</option>
                         <option value="True">True</option>
                         <option value="False">False</option>
                     </select>
 
-                    <select id="input-q-answer-mcq" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <select id="input-q-answer-mcq" class="w-full px-4 py-2.5 rounded outline-none bg-white" style="border:1px solid #E5E1DA;color:#111111;">
                         <option value="" disabled selected>Select which option is correct...</option>
                         <option value="0">Option 1 is correct</option>
                         <option value="1">Option 2 is correct</option>
@@ -176,30 +180,30 @@
 
                 <!-- CLASS SELECTION DROPDOWN -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Assign to Class</label>
-                    <select id="input-q-class" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                    <label class="block text-xs font-bold uppercase mb-1" style="color:#8A8A8A;">Assign to Class</label>
+                    <select id="input-q-class" required class="w-full px-4 py-2.5 rounded outline-none" style="border:1px solid #E5E1DA;background:#F8F7F4;color:#111111;">
                         <option value="" disabled selected>Loading classes...</option>
                     </select>
                 </div>
 
                 <div class="pt-2">
-                    <button type="submit" id="btn-submit-question" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-md">Save Question</button>
+                    <button type="submit" id="btn-submit-question" class="w-full py-3 text-white font-bold rounded transition-all" style="background:#1D3461;">Save Question</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:5001/api';
+        const API_BASE = '/api';
         let currentLecturer = null;
         let allQuestions = [];
 
         function toggleSubmenu(id) { document.getElementById(id).classList.toggle('hidden'); }
-        
+
         function openModal(editMode = false, qData = null) {
             document.getElementById('modal-question').classList.remove('hidden');
             document.getElementById('modal-title').innerText = editMode ? 'Edit Question' : 'Add New Question';
-            
+
             if(!editMode) {
                 document.getElementById('form-question').reset();
                 document.getElementById('input-q-id').value = '';
@@ -210,7 +214,7 @@
                 document.getElementById('input-q-type').value = qData.type;
                 document.getElementById('input-q-diff').value = qData.difficulty;
                 document.getElementById('input-q-class').value = qData.classId;
-                
+
                 toggleMCQFields(); // Make sure the correct inputs are shown first
 
                 if (qData.type === 'mcq' && qData.options) {
@@ -218,7 +222,7 @@
                     document.getElementById('opt-2').value = qData.options[1] || '';
                     document.getElementById('opt-3').value = qData.options[2] || '';
                     document.getElementById('opt-4').value = qData.options[3] || '';
-                    
+
                     const correctIndex = qData.options.indexOf(qData.correctAnswers[0]);
                     if (correctIndex !== -1) document.getElementById('input-q-answer-mcq').value = correctIndex.toString();
                 } else if (qData.type === 'true_false') {
@@ -228,25 +232,25 @@
                 }
             }
         }
-        
+
         function closeModal() { document.getElementById('modal-question').classList.add('hidden'); }
 
         // Dynamic UI for MCQ Options & Answer Dropdowns
         document.getElementById('input-q-type').addEventListener('change', toggleMCQFields);
-        
+
         function toggleMCQFields() {
             const type = document.getElementById('input-q-type').value;
             const mcqContainer = document.getElementById('mcq-options-container');
-            
+
             const ansText = document.getElementById('input-q-answer-text');
             const ansTF = document.getElementById('input-q-answer-tf');
             const ansMCQ = document.getElementById('input-q-answer-mcq');
-            
+
             // Hide all answer inputs first
             ansText.classList.add('hidden'); ansText.required = false;
             ansTF.classList.add('hidden'); ansTF.required = false;
             ansMCQ.classList.add('hidden'); ansMCQ.required = false;
-            
+
             if (type === 'mcq') {
                 mcqContainer.classList.remove('hidden');
                 document.querySelectorAll('#mcq-options-container input').forEach(el => el.required = true);
@@ -269,8 +273,8 @@
             const session = SecurityGuard.getSession();
             if (session) {
                 currentLecturer = session;
-                document.getElementById('lecturer-name').innerText = session.email.split('@')[0];
-                document.getElementById('lecturer-avatar').src = `https://ui-avatars.com/api/?name=${session.email}&background=4f46e5&color=fff`;
+                document.getElementById('lecturer-name').innerText = session.name || session.email.split('@')[0];
+                document.getElementById('lecturer-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(session.name || session.email)}&background=4f46e5&color=fff`;
                 await fetchClassesForDropdown();
                 await fetchQuestions();
                 toggleMCQFields(); // Initialize correct fields on load
@@ -278,34 +282,34 @@
         }
 
         async function fetchClassesForDropdown() {
-            const response = await fetch(`${API_BASE}/classes/lecturer?lecturerId=${currentLecturer.email}`);
+            const response = await SecurityGuard.authFetch(`${API_BASE}/classes/lecturer?lecturerId=${currentLecturer.email}`);
             const data = await response.json();
             const selector = document.getElementById('input-q-class');
             if (data.success && data.data.length > 0) {
-                selector.innerHTML = `<option value="" disabled selected>Select a class...</option>` + 
+                selector.innerHTML = `<option value="" disabled selected>Select a class...</option>` +
                     data.data.map(cls => `<option value="${cls._id}">${cls.className}</option>`).join('');
             }
         }
 
         async function fetchQuestions() {
-            const res = await fetch(`${API_BASE}/questions/lecturer?lecturerId=${currentLecturer.email}`);
+            const res = await SecurityGuard.authFetch(`${API_BASE}/questions/lecturer?lecturerId=${currentLecturer.email}`);
             const data = await res.json();
             const tbody = document.getElementById('question-table-body');
-            
+
             if (data.success && data.data.length > 0) {
                 allQuestions = data.data; // Store for edit mode
                 tbody.innerHTML = data.data.map(q => `
-                    <tr class="hover:bg-slate-50 transition-colors group border-b border-slate-100">
-                        <td class="px-6 py-4"><p class="text-sm font-medium text-slate-900 truncate max-w-xs md:max-w-md">${q.prompt}</p></td>
-                        <td class="px-6 py-4"><span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-[10px] font-bold uppercase">${q.type.replace('_', '/')}</span></td>
-                        <td class="px-6 py-4 text-sm font-semibold text-slate-600">${q.className}</td>
+                    <tr style="border-bottom:1px solid #E5E1DA;" onmouseover="this.style.background='#F8F7F4'" onmouseout="this.style.background='transparent'">
+                        <td class="px-6 py-4"><p class="text-sm font-medium truncate max-w-xs md:max-w-md" style="color:#111111;">${q.prompt}</p></td>
+                        <td class="px-6 py-4"><span class="px-2.5 py-1 rounded text-[10px] font-bold uppercase" style="background:#F8F7F4;color:#525252;">${q.type.replace('_', '/')}</span></td>
+                        <td class="px-6 py-4 text-sm font-semibold" style="color:#525252;">${q.className}</td>
                         <td class="px-6 py-4 text-right flex justify-end gap-2">
-                            <button onclick="editQuestion('${q._id}')" class="text-slate-400 hover:text-indigo-600 transition-colors p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
-                            <button onclick="deleteQuestion('${q._id}')" class="text-slate-400 hover:text-red-500 transition-colors p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                            <button onclick="editQuestion('${q._id}')" class="transition-colors p-1" style="color:#8A8A8A;" onmouseover="this.style.color='#1D3461'" onmouseout="this.style.color='#8A8A8A'"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                            <button onclick="deleteQuestion('${q._id}')" class="transition-colors p-1" style="color:#8A8A8A;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#8A8A8A'"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                         </td>
                     </tr>`).join('');
             } else {
-                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400">Your question bank is empty. Click "Add Question" to get started.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center" style="color:#8A8A8A;">Your question bank is empty. Click "Add Question" to get started.</td></tr>`;
             }
         }
 
@@ -318,7 +322,7 @@
         // CRUD: Delete Question
         async function deleteQuestion(id) {
             if(!confirm("Are you sure you want to delete this question?")) return;
-            await fetch(`${API_BASE}/questions/${id}`, { method: 'DELETE' });
+            await SecurityGuard.authFetch(`${API_BASE}/questions/${id}`, { method: 'DELETE' });
             fetchQuestions();
         }
 
@@ -364,12 +368,12 @@
             const method = id ? 'PUT' : 'POST';
 
             try {
-                const res = await fetch(url, {
+                const res = await SecurityGuard.authFetch(url, {
                     method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
+
                 if (res.ok) {
                     closeModal();
                     await fetchQuestions();

@@ -23,13 +23,13 @@ const AuthController = {
         if (res.success) {
             AuthView.showMessage(res.message, 'success');
             AuthView.showRedirectOverlay(res.role.toUpperCase(), res.redirectUrl);
-            
-            // FIX: Save both the role AND the email to the local session
-            localStorage.setItem('aura_user_session', JSON.stringify({ 
+
+            localStorage.setItem('aura_user_session', JSON.stringify({
                 role: res.role,
-                email: userEmail 
+                email: res.email || userEmail,
+                name: res.name || userEmail.split('@')[0]
             }));
-            
+
             setTimeout(() => window.location.href = res.redirectUrl, 2000);
         } else {
             AuthView.showMessage(res.message, 'error');

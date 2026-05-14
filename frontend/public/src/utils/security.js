@@ -1,54 +1,86 @@
 const SecurityGuard = {
     protectPage: function(allowedRole) {
         const session = localStorage.getItem('aura_user_session');
-        
         if (!session) {
-            console.warn("No active session found. Redirecting to login...");
             window.location.href = '/src/views/auth.html';
             return;
         }
-
         const user = JSON.parse(session);
-
-        // Check if the user has the right permissions for this page
         if (allowedRole && user.role !== allowedRole) {
-            alert("Access Denied: You do not have permission to view this page.");
+            alert('Access Denied: You do not have permission to view this page.');
             window.location.href = '/src/views/auth.html';
-            return;
         }
-
-        console.log(`Authenticated as ${user.role}`);
     },
 
-    // Gets the current user session data for the dashboards
     getSession: function() {
         const saved = localStorage.getItem('aura_user_session');
-        if (saved) {
-            const parsedSession = JSON.parse(saved);
-            // Safety Fallback: Ensure an email exists so .split('@') never crashes
-            if (!parsedSession.email) {
-                parsedSession.email = 'lecturer@auraexam.com'; 
-            }
-            return parsedSession;
-        }
-        return null;
+        if (!saved) return null;
+        const session = JSON.parse(saved);
+        if (!session.email) session.email = 'user@auraexam.com';
+        return session;
+    },
+
+    authFetch: function(url, options = {}) {
+        const token = localStorage.getItem('aura_token');
+        const headers = Object.assign({ 'Authorization': `Bearer ${token}` }, options.headers || {});
+        return fetch(url, Object.assign({}, options, { headers }));
     },
 
     logout: function() {
         localStorage.removeItem('aura_user_session');
+        localStorage.removeItem('aura_token');
         window.location.href = '/src/views/auth.html';
     },
 
-    // Proctoring Feature: Detect if user tries to "Exit" or switch tabs
-    initProctoring: function() {
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                console.warn("Security Alert: User left the exam tab!");
-            }
+    // ── Real proctoring: records events to tracking-service ──
+    initProctoring: function(examId) {
+        if (!examId) return;
+
+        document.addEventListener('visibilitychange', () => {
+            this._record(examId, 'tab_switch', { direction: document.hidden ? 'away' : 'return' });
         });
 
-        window.addEventListener("blur", () => {
-            console.warn("Security Alert: Window lost focus!");
+        window.addEventListener('blur', () => {
+            this._record(examId, 'window_blur', {});
         });
+
+        document.addEventListener('copy', (e) => {
+            e.preventDefault();
+            this._record(examId, 'copy_attempt', {});
+        });
+
+        document.addEventListener('paste', (e) => {
+            e.preventDefault();
+            this._record(examId, 'paste_attempt', {});
+        });
+
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            this._record(examId, 'right_click', {});
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                this._record(examId, 'fullscreen_exit', {});
+            }
+        });
+    },
+
+    _record: async function(examId, eventType, metadata) {
+        const session = this.getSession();
+        const token   = localStorage.getItem('aura_token');
+        if (!session || !token) return;
+        try {
+            await fetch('/api/tracking/event', {
+                method: 'POST',
+                headers: {
+                    'Content-Type':  'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ examId, studentId: session.email, eventType, metadata })
+            });
+        } catch {
+            // Silent — never disrupt the exam
+        }
     }
 };

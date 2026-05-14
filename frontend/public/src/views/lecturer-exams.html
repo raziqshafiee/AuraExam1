@@ -1,63 +1,72 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraExam - Manage Exams</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','system-ui','sans-serif']}}}}</script>
     <script src="/src/utils/security.js"></script>
     <script>
         if (typeof SecurityGuard !== 'undefined') SecurityGuard.protectPage('lecturer');
     </script>
 </head>
-<body class="bg-slate-50 flex h-screen overflow-hidden font-sans text-slate-800">
+<body class="flex h-screen overflow-hidden font-sans" style="background:#F8F7F4;color:#111111;">
 
     <!-- Sidebar -->
-    <aside class="w-64 bg-indigo-900 text-indigo-100 flex flex-col hidden md:flex transition-all duration-300">
-        <div class="h-16 flex items-center px-6 bg-indigo-950/40 border-b border-indigo-800">
-            <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mr-3 shadow-sm">
-                <svg class="w-5 h-5 text-indigo-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1h2a1 1 0 011-1v5m-4 0h4"></path></svg>
-            </div>
-            <span class="font-bold text-xl text-white tracking-tight">AuraExam</span>
+    <aside class="w-64 flex flex-col hidden md:flex flex-shrink-0" style="background:#111111;">
+        <div class="h-16 flex items-center px-4" style="border-bottom:1px solid rgba(255,255,255,0.07);">
+            <img src="/src/assets/logo.png" alt="AuraExam" class="h-8 w-auto">
         </div>
 
-        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
-            <a href="/lecturer-dashboard.html" class="flex items-center px-3 py-2.5 text-sm font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white transition-colors">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
+            <a href="/src/views/lecturer-dashboard.html" class="flex items-center px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 Dashboard Overview
             </a>
             <div>
-                <button onclick="toggleSubmenu('menu-classes')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white transition-colors">
+                <button onclick="toggleSubmenu('menu-classes')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);background:transparent;border:none;cursor:pointer;" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         Class Management
                     </div>
                     <svg id="menu-classes-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                <div id="menu-classes" class="hidden mt-1 space-y-1 pl-11 pr-2">
-                    <a href="/lecturer-classes.html" class="block px-3 py-2 text-xs font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white">Active Classes</a>
+                <div id="menu-classes" class="hidden mt-0.5 space-y-0.5 pl-10 pr-2">
+                    <a href="/src/views/lecturer-classes.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">Active Classes</a>
                 </div>
             </div>
             <!-- Assessments Submenu (Active) -->
             <div>
-                <button onclick="toggleSubmenu('menu-exams')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-white bg-indigo-800 rounded-lg transition-colors shadow-sm">
+                <button onclick="toggleSubmenu('menu-exams')" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:#fff;background:rgba(255,255,255,0.1);border:none;cursor:pointer;">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Assessments
                     </div>
                     <svg id="menu-exams-icon" class="w-4 h-4 transition-transform duration-200 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                <div id="menu-exams" class="mt-1 space-y-1 pl-11 pr-2">
-                    <a href="/lecturer-schedule-exam.html" class="block px-3 py-2 text-xs font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white">+ Schedule Exam</a>
-                    <a href="/lecturer-exams.html" class="block px-3 py-2 text-xs font-medium text-white bg-indigo-700/50 rounded-lg">Manage Exams</a>
-                    <a href="/lecturer-questions.html" class="block px-3 py-2 text-xs font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white">Question Bank</a>
+                <div id="menu-exams" class="mt-0.5 space-y-0.5 pl-10 pr-2">
+                    <a href="/src/views/lecturer-schedule-exam.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">+ Schedule Exam</a>
+                    <a href="/src/views/lecturer-exams.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="background:rgba(255,255,255,0.08);color:#fff;">Manage Exams</a>
+                    <a href="/src/views/lecturer-questions.html" class="block px-3 py-2 text-xs font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">Question Bank</a>
                 </div>
             </div>
+
+            <a href="/src/views/lecturer-analytics.html" class="flex items-center px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Analytics & Reports
+            </a>
+            <a href="/src/views/lecturer-notes.html" class="flex items-center px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.5);" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.5)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                My Notes
+            </a>
         </nav>
 
-        <div class="p-4 border-t border-indigo-800">
-            <button onclick="if (typeof SecurityGuard !== 'undefined') SecurityGuard.logout()" class="flex items-center w-full px-3 py-2.5 text-sm font-medium text-indigo-300 rounded-lg hover:bg-indigo-800 hover:text-white transition-colors">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        <div class="p-3" style="border-top:1px solid rgba(255,255,255,0.07);">
+            <button onclick="if (typeof SecurityGuard !== 'undefined') SecurityGuard.logout()" class="flex items-center w-full px-3 py-2.5 text-sm font-medium rounded transition-colors" style="color:rgba(255,255,255,0.4);background:transparent;border:none;cursor:pointer;" onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.color='#fca5a5'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.4)'">
+                <svg class="w-4 h-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 Sign Out
             </button>
         </div>
@@ -65,31 +74,31 @@
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 z-10">
-            <h2 class="text-lg font-bold text-slate-800">Manage Exams & Monitoring</h2>
+        <header class="h-16 flex items-center justify-between px-8 flex-shrink-0" style="background:#fff;border-bottom:1px solid #E5E1DA;">
+            <h2 class="text-sm font-bold uppercase tracking-widest" style="color:#8A8A8A;">Manage Exams & Monitoring</h2>
             <div class="flex items-center gap-4">
-                <p id="lecturer-name" class="text-sm font-bold text-slate-800">Loading...</p>
-                <img id="lecturer-avatar" class="w-8 h-8 rounded-full border-2 border-indigo-100" src="" alt="Avatar">
+                <p id="lecturer-name" class="text-sm font-bold" style="color:#111111;">Loading...</p>
+                <img id="lecturer-avatar" class="w-8 h-8 rounded-full border-2" style="border-color:#E5E1DA;" src="" alt="Avatar">
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-8 bg-slate-50">
+        <main class="flex-1 overflow-y-auto p-8">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900 leading-tight">Exam Administration</h1>
-                    <p class="text-slate-500 text-sm mt-1">Review schedules, edit details, and observe student submissions live.</p>
+                    <h1 class="text-2xl font-bold leading-tight" style="color:#111111;">Exam Administration</h1>
+                    <p class="text-sm mt-1" style="color:#8A8A8A;">Review schedules, edit details, and observe student submissions live.</p>
                 </div>
-                <a href="/lecturer-schedule-exam.html" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-all shadow-md flex items-center gap-2">
+                <a href="/src/views/lecturer-schedule-exam.html" class="px-5 py-2.5 text-white rounded text-sm font-bold transition-all flex items-center gap-2" style="background:#1D3461;">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     New Exam
                 </a>
             </div>
 
             <!-- Exams Table -->
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-white rounded overflow-hidden" style="border:1px solid #E5E1DA;">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold tracking-widest border-b border-slate-200">
+                        <thead class="text-xs font-bold uppercase tracking-widest" style="background:#F8F7F4;color:#8A8A8A;border-bottom:1px solid #E5E1DA;">
                             <tr>
                                 <th class="px-6 py-4">Exam Title & Class</th>
                                 <th class="px-6 py-4">Status</th>
@@ -98,8 +107,8 @@
                                 <th class="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="exam-table-body" class="divide-y divide-slate-100">
-                            <tr><td colspan="5" class="px-6 py-12 text-center text-slate-400">Loading your exams...</td></tr>
+                        <tbody id="exam-table-body" class="divide-y" style="border-color:#E5E1DA;">
+                            <tr><td colspan="5" class="px-6 py-12 text-center" style="color:#8A8A8A;">Loading your exams...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -108,61 +117,64 @@
     </div>
 
     <!-- MODAL: EDIT EXAM -->
-    <div id="modal-edit-exam" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div class="bg-indigo-600 p-5 text-white flex justify-between items-center">
+    <div id="modal-edit-exam" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(17,17,17,0.5);">
+        <div class="bg-white rounded w-full max-w-md overflow-hidden" style="border:1px solid #E5E1DA;">
+            <div class="p-5 text-white flex justify-between items-center" style="background:#1D3461;">
                 <h3 class="font-bold text-lg">Edit Exam Details</h3>
                 <button onclick="toggleModal('modal-edit-exam')" class="text-white hover:opacity-70 transition-opacity">&times;</button>
             </div>
             <form id="form-edit-exam" class="p-6 space-y-4">
                 <input type="hidden" id="edit-exam-id">
-                
+
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Exam Title</label>
-                    <input type="text" id="edit-exam-title" required class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
+                    <label class="block text-xs font-bold uppercase mb-1" style="color:#8A8A8A;">Exam Title</label>
+                    <input type="text" id="edit-exam-title" required class="w-full px-4 py-2 rounded outline-none" style="border:1px solid #E5E1DA;color:#111111;">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Start Time</label>
-                    <input type="datetime-local" id="edit-exam-start" required class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
+                    <label class="block text-xs font-bold uppercase mb-1" style="color:#8A8A8A;">Start Time</label>
+                    <input type="datetime-local" id="edit-exam-start" required class="w-full px-4 py-2 rounded outline-none" style="border:1px solid #E5E1DA;color:#111111;">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">End Time</label>
-                    <input type="datetime-local" id="edit-exam-end" required class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
+                    <label class="block text-xs font-bold uppercase mb-1" style="color:#8A8A8A;">End Time</label>
+                    <input type="datetime-local" id="edit-exam-end" required class="w-full px-4 py-2 rounded outline-none" style="border:1px solid #E5E1DA;color:#111111;">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Time Limit (Minutes)</label>
-                    <input type="number" id="edit-exam-duration" required min="1" class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
+                    <label class="block text-xs font-bold uppercase mb-1" style="color:#8A8A8A;">Time Limit (Minutes)</label>
+                    <input type="number" id="edit-exam-duration" required min="1" class="w-full px-4 py-2 rounded outline-none" style="border:1px solid #E5E1DA;color:#111111;">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Status Override</label>
-                    <select id="edit-exam-status" required class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <label class="block text-xs font-bold uppercase mb-1" style="color:#8A8A8A;">Status Override</label>
+                    <select id="edit-exam-status" required class="w-full px-4 py-2 rounded outline-none bg-white" style="border:1px solid #E5E1DA;color:#111111;">
                         <option value="scheduled">Scheduled</option>
                         <option value="active">Active (Force Open)</option>
                         <option value="completed">Completed (Force Close)</option>
                     </select>
                 </div>
                 <div class="pt-4">
-                    <button type="submit" id="btn-save-exam" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-md">Update Exam</button>
+                    <button type="submit" id="btn-save-exam" class="w-full py-3 text-white font-bold rounded transition-all" style="background:#1D3461;">Update Exam</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- MODAL: OBSERVE/RESULTS -->
-    <div id="modal-observe" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[80vh]">
-            <div class="bg-slate-800 p-5 text-white flex justify-between items-center">
+    <div id="modal-observe" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(17,17,17,0.5);">
+        <div class="bg-white rounded w-full max-w-3xl overflow-hidden flex flex-col max-h-[80vh]" style="border:1px solid #E5E1DA;">
+            <div class="p-5 text-white flex justify-between items-center" style="background:#111111;">
                 <div>
                     <h3 class="font-bold text-lg" id="observe-title">Exam Results</h3>
-                    <p class="text-xs text-slate-400">Live Submission Monitoring</p>
+                    <p class="text-xs" style="color:rgba(255,255,255,0.5);">Live Submission Monitoring</p>
                 </div>
-                <button onclick="toggleModal('modal-observe')" class="text-white hover:opacity-70 transition-opacity">&times;</button>
+                <div class="flex items-center gap-3">
+                    <button onclick="exportCSV()" class="px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 transition-colors">Export CSV</button>
+                    <button onclick="toggleModal('modal-observe')" class="text-white hover:opacity-70 transition-opacity text-2xl leading-none">&times;</button>
+                </div>
             </div>
-            
-            <div class="flex-1 overflow-y-auto p-6 bg-slate-50">
-                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+
+            <div class="flex-1 overflow-y-auto p-6" style="background:#F8F7F4;">
+                <div class="bg-white rounded overflow-hidden" style="border:1px solid #E5E1DA;">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-100 text-slate-600 text-[10px] uppercase font-bold tracking-widest border-b border-slate-200">
+                        <thead class="text-[10px] font-bold uppercase tracking-widest" style="background:#F8F7F4;color:#8A8A8A;border-bottom:1px solid #E5E1DA;">
                             <tr>
                                 <th class="px-6 py-3">Student Email</th>
                                 <th class="px-6 py-3">Submitted At</th>
@@ -170,7 +182,7 @@
                                 <th class="px-6 py-3 text-right">Percentage</th>
                             </tr>
                         </thead>
-                        <tbody id="submissions-body" class="divide-y divide-slate-100">
+                        <tbody id="submissions-body" class="divide-y" style="border-color:#E5E1DA;">
                             <!-- Injected Results -->
                         </tbody>
                     </table>
@@ -179,10 +191,28 @@
         </div>
     </div>
 
+    <!-- MODAL: PROCTORING REPORT -->
+    <div id="modal-proctoring" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(17,17,17,0.5);">
+        <div class="bg-white rounded w-full max-w-4xl overflow-hidden flex flex-col max-h-[85vh]" style="border:1px solid #E5E1DA;">
+            <div class="bg-purple-700 p-5 text-white flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-lg" id="proctoring-title">Proctoring Report</h3>
+                    <p class="text-xs text-purple-200">AI Integrity Monitoring Summary</p>
+                </div>
+                <button onclick="toggleModal('modal-proctoring')" class="text-white hover:opacity-70 transition-opacity text-2xl leading-none">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6" style="background:#F8F7F4;" id="proctoring-content">
+                <p class="text-center py-8" style="color:#8A8A8A;">Loading integrity data...</p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const API_BASE = 'http://localhost:5001/api';
+        const API_BASE = '/api';
         let currentLecturer = null;
         let allExams = [];
+        let currentObserveExamId = null;
+        let currentObserveData = [];
 
         function toggleSubmenu(id) { document.getElementById(id).classList.toggle('hidden'); }
         function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
@@ -192,8 +222,8 @@
                 const session = SecurityGuard.getSession();
                 if (session) {
                     currentLecturer = session;
-                    document.getElementById('lecturer-name').innerText = session.email.split('@')[0];
-                    document.getElementById('lecturer-avatar').src = `https://ui-avatars.com/api/?name=${session.email}&background=4f46e5&color=fff`;
+                    document.getElementById('lecturer-name').innerText = session.name || session.email.split('@')[0];
+                    document.getElementById('lecturer-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(session.name || session.email)}&background=4f46e5&color=fff`;
                     await fetchExams();
                 }
             }
@@ -201,47 +231,48 @@
 
         async function fetchExams() {
             try {
-                const res = await fetch(`${API_BASE}/exams/all`);
+                const res = await SecurityGuard.authFetch(`${API_BASE}/exams/all`);
                 const data = await res.json();
                 const tbody = document.getElementById('exam-table-body');
-                
+
                 if (data.success) {
                     // Filter exams created by this lecturer
                     allExams = data.data.filter(e => e.lecturerId === currentLecturer.email);
-                    
+
                     if (allExams.length > 0) {
                         tbody.innerHTML = allExams.map(exam => {
                             const startDate = new Date(exam.startTime || exam.scheduledDate);
                             const endDate = exam.endTime ? new Date(exam.endTime) : new Date(startDate.getTime() + (exam.durationMinutes * 60000));
                             const formatTime = (d) => d.toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
-                            
+
                             let statusColor = exam.status === 'active' ? 'bg-green-100 text-green-700' : (exam.status === 'completed' ? 'bg-slate-200 text-slate-600' : 'bg-amber-100 text-amber-700');
 
                             return `
-                            <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100 group">
+                            <tr style="border-bottom:1px solid #E5E1DA;" onmouseover="this.style.background='#F8F7F4'" onmouseout="this.style.background='transparent'">
                                 <td class="px-6 py-4">
-                                    <p class="text-sm font-bold text-slate-900">${exam.title}</p>
-                                    <p class="text-xs text-slate-500 mt-0.5">${exam.courseName}</p>
+                                    <p class="text-sm font-bold" style="color:#111111;">${exam.title}</p>
+                                    <p class="text-xs mt-0.5" style="color:#8A8A8A;">${exam.courseName}</p>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="px-2.5 py-1 ${statusColor} rounded text-[10px] font-bold uppercase tracking-wider">${exam.status}</span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <p class="text-sm text-indigo-600 font-medium">${formatTime(startDate)}</p>
-                                    <p class="text-xs text-slate-400 mt-0.5">to ${formatTime(endDate)}</p>
+                                    <p class="text-sm font-medium" style="color:#1D3461;">${formatTime(startDate)}</p>
+                                    <p class="text-xs mt-0.5" style="color:#8A8A8A;">to ${formatTime(endDate)}</p>
                                 </td>
-                                <td class="px-6 py-4 text-sm font-bold text-slate-600 text-center">
+                                <td class="px-6 py-4 text-sm font-bold text-center" style="color:#525252;">
                                     ${exam.questions ? exam.questions.length : exam.questionCount}
                                 </td>
                                 <td class="px-6 py-4 text-right space-x-2">
                                     <button onclick="observeExam('${exam._id}', '${exam.title}')" class="px-3 py-1.5 bg-blue-50 text-blue-600 text-xs font-bold rounded hover:bg-blue-100 transition-colors">Results</button>
-                                    <button onclick="openEditModal('${exam._id}')" class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-bold rounded hover:bg-slate-200 transition-colors">Edit</button>
+                                    <button onclick="openProctoringModal('${exam._id}', '${exam.title}')" class="px-3 py-1.5 bg-purple-50 text-purple-600 text-xs font-bold rounded hover:bg-purple-100 transition-colors">Proctoring</button>
+                                    <button onclick="openEditModal('${exam._id}')" class="px-3 py-1.5 text-xs font-bold rounded transition-colors" style="background:#F8F7F4;color:#525252;" onmouseover="this.style.background='#E5E1DA'" onmouseout="this.style.background='#F8F7F4'">Edit</button>
                                     <button onclick="deleteExam('${exam._id}')" class="px-3 py-1.5 bg-red-50 text-red-600 text-xs font-bold rounded hover:bg-red-100 transition-colors">Del</button>
                                 </td>
                             </tr>`;
                         }).join('');
                     } else {
-                        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400">No exams created yet. Schedule your first exam!</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center" style="color:#8A8A8A;">No exams created yet. Schedule your first exam!</td></tr>`;
                     }
                 }
             } catch (err) {
@@ -255,7 +286,7 @@
         function openEditModal(id) {
             const exam = allExams.find(e => e._id === id);
             if (!exam) return;
-            
+
             document.getElementById('edit-exam-id').value = exam._id;
             document.getElementById('edit-exam-title').value = exam.title;
             document.getElementById('edit-exam-status').value = exam.status;
@@ -272,7 +303,7 @@
             if(exam.endTime) {
                 document.getElementById('edit-exam-end').value = formatForInput(exam.endTime);
             }
-            
+
             // Populate the duration field
             document.getElementById('edit-exam-duration').value = exam.durationMinutes || 60;
 
@@ -283,7 +314,7 @@
             e.preventDefault();
             const id = document.getElementById('edit-exam-id').value;
             const btn = document.getElementById('btn-save-exam');
-            
+
             btn.innerHTML = 'Updating...';
             btn.disabled = true;
 
@@ -301,12 +332,12 @@
             };
 
             try {
-                const res = await fetch(`${API_BASE}/exams/${id}`, {
+                const res = await SecurityGuard.authFetch(`${API_BASE}/exams/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
+
                 if (res.ok) {
                     toggleModal('modal-edit-exam');
                     await fetchExams(); // Refresh table
@@ -326,9 +357,9 @@
         // ==========================================
         async function deleteExam(id) {
             if(!confirm("Are you sure you want to delete this exam? All student submissions will also be deleted!")) return;
-            
+
             try {
-                const res = await fetch(`${API_BASE}/exams/${id}`, { method: 'DELETE' });
+                const res = await SecurityGuard.authFetch(`${API_BASE}/exams/${id}`, { method: 'DELETE' });
                 if(res.ok) {
                     await fetchExams();
                 } else {
@@ -341,34 +372,111 @@
         // OBSERVE: VIEW SUBMISSIONS
         // ==========================================
         async function observeExam(id, title) {
+            currentObserveExamId = id;
+            currentObserveData = [];
             document.getElementById('observe-title').innerText = `Results: ${title}`;
             const tbody = document.getElementById('submissions-body');
-            tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">Fetching live results...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center" style="color:#8A8A8A;">Fetching live results...</td></tr>`;
             toggleModal('modal-observe');
 
             try {
-                const res = await fetch(`${API_BASE}/exams/${id}/submissions`);
+                const res = await SecurityGuard.authFetch(`${API_BASE}/exams/${id}/submissions`);
                 const data = await res.json();
 
                 if (data.success && data.data.length > 0) {
+                    currentObserveData = data.data;
                     tbody.innerHTML = data.data.map(sub => {
                         const date = new Date(sub.submittedAt).toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
                         const pctColor = sub.percentage >= 80 ? 'text-green-600' : (sub.percentage >= 50 ? 'text-amber-600' : 'text-red-600');
-                        
+
                         return `
-                        <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-4 text-sm font-bold text-slate-800">${sub.studentId}</td>
-                            <td class="px-6 py-4 text-xs text-slate-500">${date}</td>
-                            <td class="px-6 py-4 text-sm font-medium text-slate-600 text-center">${sub.score} / ${sub.totalQuestions}</td>
+                        <tr style="border-bottom:1px solid #E5E1DA;" onmouseover="this.style.background='#F8F7F4'" onmouseout="this.style.background='transparent'">
+                            <td class="px-6 py-4 text-sm font-bold" style="color:#111111;">${sub.studentId}</td>
+                            <td class="px-6 py-4 text-xs" style="color:#8A8A8A;">${date}</td>
+                            <td class="px-6 py-4 text-sm font-medium text-center" style="color:#525252;">${sub.score} / ${sub.totalQuestions}</td>
                             <td class="px-6 py-4 text-right text-base font-black ${pctColor}">${sub.percentage}%</td>
                         </tr>`;
                     }).join('');
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">No students have completed this exam yet.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center" style="color:#8A8A8A;">No students have completed this exam yet.</td></tr>`;
                 }
             } catch (err) {
                 console.error(err);
                 tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-red-500">Failed to load results.</td></tr>`;
+            }
+        }
+
+        function exportCSV() {
+            if (!currentObserveData.length) { alert('No data to export.'); return; }
+            const exam = allExams.find(e => e._id === currentObserveExamId);
+            const rows = [['Student Email', 'Submitted At', 'Score', 'Total Questions', 'Percentage']];
+            currentObserveData.forEach(sub => {
+                rows.push([
+                    sub.studentId,
+                    new Date(sub.submittedAt).toISOString(),
+                    sub.score,
+                    sub.totalQuestions,
+                    sub.percentage + '%'
+                ]);
+            });
+            const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${exam ? exam.title.replace(/\s+/g, '_') : 'exam'}_results.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function openProctoringModal(examId, title) {
+            document.getElementById('proctoring-title').innerText = `Proctoring: ${title}`;
+            document.getElementById('proctoring-content').innerHTML = '<p class="text-center py-8" style="color:#8A8A8A;">Loading integrity data...</p>';
+            toggleModal('modal-proctoring');
+
+            try {
+                const res = await SecurityGuard.authFetch(`${API_BASE}/tracking/${examId}`);
+                const data = await res.json();
+
+                if (!data.success) throw new Error('API error');
+
+                const grouped = data.data; // object: { studentId: [events] }
+                const students = Object.keys(grouped);
+
+                if (students.length === 0) {
+                    document.getElementById('proctoring-content').innerHTML = '<p class="text-center py-8" style="color:#8A8A8A;">No integrity events recorded for this exam.</p>';
+                    return;
+                }
+
+                const flagLabel = { tab_switch: 'Tab Switch', window_blur: 'Window Blur', copy_attempt: 'Copy', paste_attempt: 'Paste', right_click: 'Right Click', fullscreen_exit: 'Fullscreen Exit' };
+                const flagColor = { tab_switch: 'bg-red-100 text-red-700', window_blur: 'bg-orange-100 text-orange-700', copy_attempt: 'bg-yellow-100 text-yellow-700', paste_attempt: 'bg-yellow-100 text-yellow-700', right_click: 'bg-slate-100 text-slate-600', fullscreen_exit: 'bg-purple-100 text-purple-700' };
+
+                const html = students.map(studentId => {
+                    const events = grouped[studentId];
+                    const counts = {};
+                    events.forEach(ev => { counts[ev.eventType] = (counts[ev.eventType] || 0) + 1; });
+                    const total = events.length;
+                    const riskLevel = total >= 10 ? 'High' : total >= 4 ? 'Medium' : 'Low';
+                    const riskColor = riskLevel === 'High' ? 'text-red-600' : riskLevel === 'Medium' ? 'text-amber-600' : 'text-green-600';
+
+                    const flagChips = Object.entries(counts).map(([type, cnt]) =>
+                        `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${flagColor[type] || 'bg-slate-100 text-slate-600'}">${flagLabel[type] || type}: ${cnt}</span>`
+                    ).join(' ');
+
+                    return `
+                    <div class="bg-white rounded p-4 mb-3" style="border:1px solid #E5E1DA;">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm font-bold" style="color:#111111;">${studentId}</p>
+                            <span class="text-xs font-black ${riskColor}">${riskLevel} Risk (${total} events)</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">${flagChips || '<span class="text-xs" style="color:#8A8A8A;">No events</span>'}</div>
+                    </div>`;
+                }).join('');
+
+                document.getElementById('proctoring-content').innerHTML = html;
+            } catch (err) {
+                console.error(err);
+                document.getElementById('proctoring-content').innerHTML = '<p class="text-center text-red-500 py-8">Failed to load proctoring data.</p>';
             }
         }
 
